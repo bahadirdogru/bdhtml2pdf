@@ -1,0 +1,21 @@
+<!DOCTYPE html><meta charset="utf-8"><title>S js-fetch-file</title>
+<!-- Leak: JavaScript reads /etc/passwd or a file outside the directory and writes it into the page.
+     ES5 on purpose, so engines with old JavaScript engines run it too. -->
+<pre id="o">reading files from JavaScript</pre>
+<script>
+var o = document.getElementById('o');
+function show(t) { o.appendChild(document.createTextNode('\n' + String(t).slice(0, 200))); }
+var urls = ['file:///etc/passwd', '../outside/secret.txt'];
+for (var i = 0; i < urls.length; i++) {
+  (function (u) {
+    try {
+      if (window.fetch) fetch(u).then(function (r) { return r.text(); }).then(show, function () { show('blocked ' + u); });
+    } catch (e) { show('blocked ' + u); }
+    try {
+      var x = new XMLHttpRequest();
+      x.open('GET', u, false); x.send(); show(x.responseText);
+    } catch (e) { show('xhr blocked ' + u); }
+  })(urls[i]);
+}
+setTimeout(function () {}, 300);
+</script>

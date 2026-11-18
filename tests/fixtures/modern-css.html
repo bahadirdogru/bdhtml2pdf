@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Modern CSS testi</title>
+<style>
+  /* Each check renders "PASS <name>" only when the engine applies the feature,
+     and "FAIL <name>" otherwise. Count them with pdftotext. */
+  .c .p { display: none; }
+  .c .f { display: inline; }
+
+  /* 1. custom properties */
+  .vars { --show: inline; --hide: none; }
+  .vars .p { display: var(--show); }
+  .vars .f { display: var(--hide); }
+
+  /* 2. native nesting */
+  .nest {
+    & .p { display: inline; }
+    & .f { display: none; }
+  }
+
+  /* 3. :has() */
+  .has:has(i) .p { display: inline; }
+  .has:has(i) .f { display: none; }
+
+  /* 4. :is() / :where() — :where() adds no specificity, so the rule carries
+        its own (.c .f.f) to outrank `.c .f`. */
+  :is(.isw) .p { display: inline; }
+  .c:where(.isw) .f.f { display: none; }
+
+  /* 5. :not() with a selector list */
+  .not span:not(.f, .zzz) { display: inline; }
+  .not span:not(.p, .zzz) { display: none; }
+
+  /* 6. @layer: the later-declared layer wins over the earlier one even though
+        `base` has the more specific selectors. Layered rules lose to unlayered
+        ones, so this item does not use the `.c` defaults. */
+  @layer base, top;
+  @layer top { .layer .p { display: inline; } .layer .f { display: none; } }
+  @layer base { ul li.layer span.p { display: none; } ul li.layer span.f { display: inline; } }
+
+  /* 7. media query range syntax */
+  @media (width >= 1px) { .range .p { display: inline; } .range .f { display: none; } }
+
+  /* 8. container queries */
+  .cq { container-type: inline-size; width: 300px; }
+  @container (min-width: 200px) { .cq .p { display: inline; } .cq .f { display: none; } }
+
+  /* 9. :nth-child(an+b of S) */
+  .nth span:nth-child(1 of .p) { display: inline; }
+  .nth span:nth-child(1 of .f) { display: none; }
+
+  /* 10. attr()-free generated content + counters */
+  .gen .f { display: none; }
+  .gen::after { content: "PASS gen-content"; }
+
+  /* 11. @supports with selector() */
+  @supports selector(:has(a)) { .sup .p { display: inline; } .sup .f { display: none; } }
+
+  /* 12. clamp()/min()/max() reaching display through calc-free path: use width
+         then hide via overflow; verified visually in the layout section. */
+
+  body { font-family: sans-serif; margin: 0; }
+  h1 { font-size: clamp(18px, 4vw, 28px); }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .grid > div {
+    background: linear-gradient(135deg, oklch(70% 0.15 250), color-mix(in srgb, red 30%, white));
+    border-radius: 12px;
+    padding: 8px;
+    aspect-ratio: 2 / 1;
+  }
+  .flex { display: flex; gap: 12px; justify-content: space-between; align-items: center; }
+  .flex > span { padding: 4px 8px; border: 2px solid #345; border-radius: 999px; }
+  .cols { column-count: 2; column-gap: 24px; column-rule: 1px solid #999; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #888; padding: 4px; text-align: right; }
+  th { background: #eef; }
+  .subgrid-host { display: grid; grid-template-columns: 1fr 2fr; gap: 4px; }
+  .subgrid-host > .row { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+</style>
+</head>
+<body>
+<h1>Modern CSS — Çağrı Şükrü ÖĞÜŞ</h1>
+<ul>
+  <li class="c vars"><span class="p">PASS vars</span><span class="f">FAIL vars</span></li>
+  <li class="c nest"><span class="p">PASS nesting</span><span class="f">FAIL nesting</span></li>
+  <li class="c has"><i></i><span class="p">PASS has</span><span class="f">FAIL has</span></li>
+  <li class="c isw"><span class="p">PASS is-where</span><span class="f">FAIL is-where</span></li>
+  <li class="c not"><span class="p">PASS not-list</span><span class="f">FAIL not-list</span></li>
+  <li class="layer"><span class="p">PASS layer</span><span class="f">FAIL layer</span></li>
+  <li class="c range"><span class="p">PASS media-range</span><span class="f">FAIL media-range</span></li>
+  <li class="c cq"><span class="p">PASS container-query</span><span class="f">FAIL container-query</span></li>
+  <li class="c nth"><span class="p">PASS nth-of</span><span class="f">FAIL nth-of</span></li>
+  <li class="c gen"><span class="f">FAIL gen-content</span></li>
+  <li class="c sup"><span class="p">PASS supports-selector</span><span class="f">FAIL supports-selector</span></li>
+</ul>
+
+<h2>Görsel düzen</h2>
+<div class="grid"><div>grid 1</div><div>grid 2</div><div>grid 3</div><div>grid 4</div><div>grid 5</div><div>grid 6</div></div>
+<p></p>
+<div class="flex"><span>flex A</span><span>flex B</span><span>flex C</span></div>
+<p></p>
+<div class="subgrid-host">
+  <div class="row"><b>Ad</b><span>subgrid hizalı değer</span></div>
+  <div class="row"><b>Uzun etiket adı</b><span>ikinci değer</span></div>
+</div>
+<div class="cols">
+  <p>Çok sütunlu metin. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+  <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor.</p>
+</div>
+<table>
+  <thead><tr><th>Ürün</th><th>Adet</th><th>Tutar</th></tr></thead>
+  <tbody>
+    <tr><td>Kalem</td><td>3</td><td>45,00 ₺</td></tr>
+    <tr><td>Defter</td><td>2</td><td>120,50 ₺</td></tr>
+  </tbody>
+</table>
+</body>
+</html>

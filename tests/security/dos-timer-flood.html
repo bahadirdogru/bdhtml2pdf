@@ -1,0 +1,7 @@
+<!DOCTYPE html><meta charset="utf-8"><title>S dos-timer-flood</title>
+<!-- DoS: timers that never stop rescheduling and grow the DOM. ES5 on purpose. -->
+<p>timer flood</p>
+<script>
+setInterval(function () { document.body.appendChild(document.createElement('span')); }, 0);
+(function again() { setTimeout(again, 0); })();
+</script>

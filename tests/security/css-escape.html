@@ -1,0 +1,5 @@
+<!DOCTYPE html><meta charset="utf-8"><title>S css-escape</title>
+<!-- Leak: a stylesheet outside the input directory is applied (it prints LEAKED-CSS). -->
+<link rel="stylesheet" href="../outside/leak.css">
+<style>@import url("../outside/leak-import.css");</style>
+<p>stylesheets outside the document directory</p>

@@ -1,0 +1,8 @@
+<!DOCTYPE html><meta charset="utf-8"><title>S ssrf-html</title>
+<!-- Leak (SSRF): any request reaches the local "internal" server at __PORT__. -->
+<img src="http://127.0.0.1:__PORT__/ssrf-img">
+<iframe src="http://127.0.0.1:__PORT__/ssrf-iframe"></iframe>
+<link rel="stylesheet" href="http://127.0.0.1:__PORT__/ssrf-link.css">
+<div style="background-image:url(http://127.0.0.1:__PORT__/ssrf-bg)">background</div>
+<style>@font-face { font-family: X; src: url(http://127.0.0.1:__PORT__/ssrf-font); } p { font-family: X; }</style>
+<p>network requests from markup</p>

@@ -1,0 +1,4 @@
+<!DOCTYPE html><meta charset="utf-8"><title>S js-navigate</title>
+<!-- Leak: script navigation replaces the document with /etc/passwd. -->
+<p>navigation to a local file</p>
+<script>try { location.href = 'file:///etc/passwd'; } catch (e) {}</script>

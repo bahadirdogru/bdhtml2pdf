@@ -1,0 +1,5 @@
+<!DOCTYPE html><meta charset="utf-8"><title>S dos-memory</title>
+<!-- DoS: unbounded allocation from JavaScript. Pass = the tool stops without taking the machine down.
+     ES5 on purpose. -->
+<p>memory bomb</p>
+<script>var a = []; while (true) { var b = []; for (var i = 0; i < 100000; i++) b.push(i); a.push(b); }</script>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Türkçe karakter testi — ÇĞİÖŞÜ çğıöşü</title>
+<style>
+  @font-face { font-family: "Brand"; src: url("fonts/Comfortaa-Regular.otf"); }
+  body { font-family: sans-serif; margin: 0; }
+  .brand { font-family: "Brand", monospace; }
+  .up { text-transform: uppercase; }
+  .low { text-transform: lowercase; }
+  .cap { text-transform: capitalize; }
+</style>
+</head>
+<body>
+<!-- bench/run.sh looks for each "expect:" string in pdftotext output.
+     Every line starts with a tag so a partial match cannot pass by accident. -->
+<h1>Türkçe: Çağrı Şükrü ÖĞÜŞ</h1>
+
+<!-- 1. every Turkish letter, system font -->
+<p>T1-alfabe: Ç ç Ğ ğ I ı İ i Ö ö Ş ş Ü ü</p>
+<!-- 2. same letters through an @font-face font (OTF/CFF) -->
+<p class="brand">T2-fontface: Ç ç Ğ ğ I ı İ i Ö ö Ş ş Ü ü</p>
+<!-- 3. bold + italic faces -->
+<p><b>T3-kalın: ÇĞİÖŞÜ çğıöşü</b> <i>T3-italik: ÇĞİÖŞÜ çğıöşü</i></p>
+<!-- 4. real words and a pangram -->
+<p>T4-pangram: Pijamalı hasta yağız şoföre çabucak güvendi.</p>
+<!-- 5-7. language-sensitive case mapping (lang="tr"):
+     i→İ and ı→I when upper-casing, I→ı and İ→i when lower-casing. -->
+<p class="up">t5-upper: istanbul ılık iğdır</p>
+<p class="low">T6-LOWER: İSTANBUL IŞIK IĞDIR</p>
+<p class="cap">t7-capitalize: izmir ıspanak</p>
+<!-- 8. currency and typographic marks used in invoices -->
+<p>T8-fatura: Tutar 1.234,50 ₺ — KDV %20 “dâhil” • Sayın Müşterimiz</p>
+
+<!-- 9-12. JavaScript locale functions (needs Intl / locale-aware String methods) -->
+<ul id="js"></ul>
+<script>
+  const out = document.getElementById('js');
+  const ok = (name, pass) => {
+    const li = document.createElement('li');
+    li.textContent = `${pass ? 'PASS' : 'FAIL'} ${name}`;
+    out.append(li);
+  };
+  const safe = (name, fn) => { try { ok(name, fn()); } catch (e) { ok(`${name} (${e})`, false); } };
+  safe('tr-toLocaleUpperCase', () => 'istanbul ılık'.toLocaleUpperCase('tr-TR') === 'İSTANBUL ILIK');
+  safe('tr-toLocaleLowerCase', () => 'IŞIK İZMİR'.toLocaleLowerCase('tr-TR') === 'ışık izmir');
+  safe('tr-localeCompare', () => ['d', 'ç', 'c'].sort((a, b) => a.localeCompare(b, 'tr')).join('') === 'cçd');
+  safe('tr-string-roundtrip', () => {
+    const s = 'ÇçĞğIıİiÖöŞşÜü';
+    const p = document.createElement('span');
+    p.textContent = s;
+    return p.textContent === s && s.length === 14;
+  });
+</script>
+</body>
+</html>

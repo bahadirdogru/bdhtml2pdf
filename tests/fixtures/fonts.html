@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Font test</title>
+<style>
+  /* Aliased family names: the only way to get these faces is the @font-face rule,
+     so the font name embedded in the PDF tells whether the rule was honoured. */
+  @font-face { font-family: "BrandOTF"; src: url("fonts/Comfortaa-Regular.otf") format("opentype"); }
+  @font-face { font-family: "BrandWOFF2"; src: url("fonts/NotoSans-Regular.woff2") format("woff2"); }
+  body { font-family: serif; margin: 0; }
+  .otf { font-family: "BrandOTF", serif; }
+  .woff2 { font-family: "BrandWOFF2", serif; }
+  .mono { font-family: monospace; }
+  .liga { font-family: serif; font-variant-ligatures: common-ligatures; }
+</style>
+</head>
+<body>
+<p class="otf">F1-otf: font-face OpenType CFF</p>
+<p class="woff2">F2-woff2: font-face WOFF2</p>
+<p class="mono">F3-mono: generic monospace 0123456789</p>
+<p>F4-cjk: 日本語のテキスト</p>
+<p dir="rtl" lang="ar">F5-arabic: مرحبا بالعالم</p>
+<p class="liga">F6-ligature: office affluent</p>
+<p>F7-symbols: € ₺ © ® ™ ½ → ✓</p>
+</body>
+</html>

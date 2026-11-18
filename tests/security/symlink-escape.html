@@ -1,0 +1,5 @@
+<!DOCTYPE html><meta charset="utf-8"><title>S symlink-escape</title>
+<!-- Leak: a symlink inside the directory pointing outside is followed (prints LEAKED-JS / LEAKED-CSS). -->
+<link rel="stylesheet" href="link.css">
+<p>symlinks pointing outside the document directory</p>
+<script src="link.js"></script>
