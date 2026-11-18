@@ -92,6 +92,8 @@ pull requests.
 | Blitz | Serializer: HTML elements are never written as `<x />` | `<i></i>` was serialized as `<i />`, which HTML parses as an *open* `<i>`. After a JavaScript round trip, the rest of the page became italic or was swallowed. A regression test is added. |
 | fulgur | Port to Blitz master / Stylo 0.24 / Parley 0.13 / Taffy git | New network-handler model, layout data only on element nodes, Stylo getter renames, Parley run indices, Taffy's new `LayoutOutput` fields. |
 | fulgur | Counter attributes in the null namespace, set through the DOM mutator | Blitz 0.3 matches attribute namespaces, so `counter()` / `counters()` in `::before` rendered empty. |
+| Blitz | Outside list markers keep `white-space: pre` (CSS Lists 3 UA style) | Parley 0.13 collapsed the trailing space of `"1. "`, so numbered markers touched the item text (`1.Author`). |
+| fulgur | A captioned table's percentage width moves to the caption wrapper | The `fit-content` caption wrapper made `width:100%` tables shrink to their content width under Blitz 0.3. |
 
 ## Resource policy
 
