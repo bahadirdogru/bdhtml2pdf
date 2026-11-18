@@ -1,0 +1,40 @@
+[package]
+name = "bdhtml2pdf"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+license = "GPL-3.0-or-later"
+description = "Lightweight HTML / JavaScript to PDF engine (modern wkhtmltopdf successor)"
+
+[dependencies]
+# DOM + Stylo + Taffy + Parley, ve Boa JS binding'i (blitz-vibey-script).
+# Blitz master'dan sabit rev ile; vibey-script crates.io'da yayınlanmıyor.
+blitz-dom = { git = "https://github.com/DioxusLabs/blitz", rev = "b4ad543def00146850352c3da5dbc027f9053015", default-features = false, features = ["svg", "woff", "system-fonts"] }
+blitz-html = { git = "https://github.com/DioxusLabs/blitz", rev = "b4ad543def00146850352c3da5dbc027f9053015" }
+blitz-traits = { git = "https://github.com/DioxusLabs/blitz", rev = "b4ad543def00146850352c3da5dbc027f9053015" }
+blitz-vibey-script = { git = "https://github.com/DioxusLabs/blitz", rev = "b4ad543def00146850352c3da5dbc027f9053015" }
+
+# PDF backend: fulgur, Blitz master'a taşınmış yerel dal (../fulgur, branch
+# blitz-master). Tek Stylo (0.24) — JS'in kullandığı DOM ile aynı motor.
+fulgur = { path = "../fulgur/crates/fulgur" }
+
+# Stylo runtime prefs: Blitz leaves `:has()`, `:nth-child(of S)` and container
+# queries switched off; bdhtml2pdf turns them on (see src/prefs.rs).
+style_config = { version = "0.24.0", package = "stylo_static_prefs" }
+clap = { version = "4", default-features = false, features = ["std", "derive", "help", "usage", "error-context"] }
+url = "2"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+
+# fulgur ile aynı Blitz kopyasını kullan: yerel klon (rev b4ad543 + `LayoutPassState`
+# ve `Node::svg_source` public yapan yama). Upstream'e PR olarak gönderilecek.
+[patch."https://github.com/DioxusLabs/blitz"]
+blitz-dom = { path = "../blitz/packages/blitz-dom" }
+blitz-html = { path = "../blitz/packages/blitz-html" }
+blitz-traits = { path = "../blitz/packages/blitz-traits" }
+blitz-vibey-script = { path = "../blitz/packages/blitz-vibey-script" }
