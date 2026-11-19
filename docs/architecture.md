@@ -115,6 +115,7 @@ upstream. Status as of 2026-11-19.
 | fulgur | Boxes inside paragraphs | Floats in a line of text were drawn at their placeholder, and inline blocks and floats in paragraphs split across pages were not drawn. | #969 |
 | fulgur | Metric-compatible font aliases | Without Arial installed, `font-family: Arial` fell to the default font instead of Liberation Sans, so lines were wider and documents gained pages. | #969 |
 | fulgur | Borders in the collapsing border model | `border-collapse: collapse` tables drew no borders: Blitz lays them out as gutters and paints them in its own renderer. | #969 |
+| fulgur | Content scale and shrink-to-fit | Content wider than the page ran off the paper; wkhtmltopdf's smart shrinking (everything at 80%) had no counterpart. | #969 |
 
 ## Resource policy
 

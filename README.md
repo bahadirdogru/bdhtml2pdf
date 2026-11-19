@@ -236,6 +236,8 @@ JavaScript). Anything else is PDF; `-f, --format pdf|png|jpg|html` overrides it.
 <tr><td><code>--page-width</code>, <code>--page-height</code></td><td></td><td>custom size, e.g. <code>210mm</code></td></tr>
 <tr><td><code>-T/-B/-L/-R, --margin-*</code></td><td><code>10mm</code></td><td><code>mm</code>, <code>cm</code>, <code>in</code>, <code>pt</code>, <code>px</code></td></tr>
 <tr><td><code>--title</code></td><td></td><td>PDF title</td></tr>
+<tr><td><code>--enable-smart-shrinking</code></td><td></td><td>print every page at 80%, as wkhtmltopdf does by default; for pages written for wkhtmltopdf</td></tr>
+<tr><td><code>--disable-smart-shrinking</code></td><td></td><td>never shrink; by default content wider than the page is scaled down to fit, to at most half size</td></tr>
 <tr><th colspan="3" align="left">🖼️ Image (PNG, JPEG)</th></tr>
 <tr><td><code>--width</code></td><td><code>1024</code></td><td>viewport width in pixels</td></tr>
 <tr><td><code>--height</code></td><td><code>0</code></td><td>image height in pixels; <code>0</code> captures the whole page (up to 32 768 pixels)</td></tr>

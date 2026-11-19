@@ -8,7 +8,21 @@ pub struct PageOptions {
     pub margin_right: f32,
     pub margin_bottom: f32,
     pub margin_left: f32,
+    /// Content scale: the page is laid out `1 / scale` times larger in CSS
+    /// px and printed at `scale` (1 = CSS size).
+    pub scale: f32,
+    /// Shrink content wider than the page to fit it, down to this scale;
+    /// `None` never shrinks.
+    pub shrink_to_fit: Option<f32>,
 }
+
+/// The scale wkhtmltopdf prints at with smart shrinking on (its default):
+/// WebKit lays a printed page out 1.25 times wider than the paper.
+pub const SMART_SHRINK_SCALE: f32 = 0.8;
+
+/// The lowest scale content wider than the page is shrunk to, as in WebKit
+/// and Blink printing (a maximum shrink factor of 2).
+pub const MIN_SHRINK_SCALE: f32 = 0.5;
 
 const fn mm(v: f32) -> f32 {
     v * 72.0 / 25.4

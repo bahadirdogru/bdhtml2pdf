@@ -33,6 +33,12 @@ fn engine(
     if let Some(h) = viewport_height_px {
         builder = builder.viewport_height(h);
     }
+    if page.scale != 1.0 {
+        builder = builder.scale(page.scale);
+    }
+    if let Some(min) = page.shrink_to_fit {
+        builder = builder.shrink_to_fit(min);
+    }
     builder.build()
 }
 

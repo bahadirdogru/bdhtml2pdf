@@ -97,6 +97,8 @@ pub fn render_image(
         margin_right: 0.0,
         margin_bottom: 0.0,
         margin_left: 0.0,
+        scale: 1.0,
+        shrink_to_fit: None,
     };
 
     // `vh` units and `height: 100%` on the root follow the viewport, as in a

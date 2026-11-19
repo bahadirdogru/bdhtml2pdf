@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use bdhtml2pdf::depth::with_large_stack;
 use bdhtml2pdf::limits::{EXIT_JS_TIMEOUT, LimitedAlloc, set_memory_limit};
-use bdhtml2pdf::page::{NAMED_SIZES, length_pt, named_size};
+use bdhtml2pdf::page::{MIN_SHRINK_SCALE, NAMED_SIZES, SMART_SHRINK_SCALE, length_pt, named_size};
 use bdhtml2pdf::{ImageFormat, ImageOptions, JsOptions, JsTimeout, PageOptions};
 use clap::Parser;
 
@@ -54,6 +54,14 @@ struct Cli {
     /// PDF title
     #[arg(long)]
     title: Option<String>,
+    /// Print every page at 80%, as wkhtmltopdf does by default, for pages
+    /// written for wkhtmltopdf; content still wider is shrunk to fit
+    #[arg(long, conflicts_with = "disable_smart_shrinking")]
+    enable_smart_shrinking: bool,
+    /// Never shrink content wider than the page (by default it is scaled
+    /// down, to at most half size, to fit the page width)
+    #[arg(long)]
+    disable_smart_shrinking: bool,
 
     /// Image: viewport width in pixels
     #[arg(long, default_value_t = 1024)]
@@ -122,6 +130,12 @@ fn page_options(cli: &Cli) -> Result<PageOptions, String> {
         margin_right: length_pt(&cli.margin_right)?,
         margin_bottom: length_pt(&cli.margin_bottom)?,
         margin_left: length_pt(&cli.margin_left)?,
+        scale: if cli.enable_smart_shrinking {
+            SMART_SHRINK_SCALE
+        } else {
+            1.0
+        },
+        shrink_to_fit: (!cli.disable_smart_shrinking).then_some(MIN_SHRINK_SCALE),
     })
 }
 
@@ -203,7 +217,14 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
                         .height
                         .unwrap_or(bdhtml2pdf::image::DEFAULT_VIEWPORT_HEIGHT),
                 ),
-                _ => bdhtml2pdf::lifecycle::A4_VIEWPORT,
+                // Scripts see the page as wide as it is laid out.
+                _ => {
+                    let (w, h) = bdhtml2pdf::lifecycle::A4_VIEWPORT;
+                    (
+                        (w as f32 / page.scale) as u32,
+                        (h as f32 / page.scale) as u32,
+                    )
+                }
             },
         };
         let res = bdhtml2pdf::run_scripts_bounded(html, base_dir.clone(), js)??;
