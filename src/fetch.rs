@@ -13,7 +13,9 @@ pub struct SandboxedFetcher {
 impl SandboxedFetcher {
     /// `root` must exist; files outside it are refused.
     pub fn new(root: &Path) -> std::io::Result<Self> {
-        Ok(Self { root: root.canonicalize()? })
+        Ok(Self {
+            root: root.canonicalize()?,
+        })
     }
 }
 

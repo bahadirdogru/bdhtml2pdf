@@ -36,7 +36,10 @@ pub fn length_pt(s: &str) -> Result<f32, String> {
     let s = s.trim();
     let split = s.find(|c: char| c.is_ascii_alphabetic()).unwrap_or(s.len());
     let (num, unit) = s.split_at(split);
-    let v: f32 = num.trim().parse().map_err(|_| format!("invalid length: {s:?}"))?;
+    let v: f32 = num
+        .trim()
+        .parse()
+        .map_err(|_| format!("invalid length: {s:?}"))?;
     if !v.is_finite() || v < 0.0 {
         return Err(format!("invalid length: {s:?}"));
     }
