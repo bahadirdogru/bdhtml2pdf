@@ -26,21 +26,20 @@ fn pages(pdf: &[u8]) -> usize {
     count(b"/Type /Page") - count(b"/Type /Pages")
 }
 
+/// Fixed-height boxes, so the page count does not depend on the fonts: an
+/// A4 page with 10 mm margins holds 1047 CSS px, ten 100 px boxes; at 80% it
+/// holds 1309 px, thirteen.
 #[test]
 fn smart_shrinking_fits_more_on_a_page() {
     let html = format!(
-        "<!DOCTYPE html><meta charset=utf-8><body>{}</body>",
-        "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>".repeat(150)
+        "<!DOCTYPE html><body style='margin:0'>{}</body>",
+        "<div style='height:100px'></div>".repeat(60)
     );
     let (o, normal) = run(&[], &html, "normal");
     assert!(o.status.success());
     let (o, smart) = run(&["--enable-smart-shrinking"], &html, "smart");
     assert!(o.status.success());
-    let (normal, smart) = (pages(&normal), pages(&smart));
-    assert!(
-        normal >= 3 && smart < normal,
-        "{normal} pages, {smart} with smart shrinking"
-    );
+    assert_eq!((pages(&normal), pages(&smart)), (6, 5));
 }
 
 #[test]
