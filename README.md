@@ -258,9 +258,6 @@ Found by our own test suites; details and plans are in
   across columns and pages, and floats move with the text beside them. Bare
   text mixed with blocks inside the columns does not break between lines,
   and a positioned child turns splitting off for its column set.
-- **A float inside a line of text is drawn in the wrong place** (or not at
-  all): `<p><span style="float:left">…</span>text</p>`. The text makes room
-  for it. Block-level floats are fine.
 - **`oklch()` and other modern colors in SVG attributes draw black**
   (`<rect fill="oklch(…)">`). Use hex or `rgb()` there; CSS colors in HTML
   are fine.
