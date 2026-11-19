@@ -44,7 +44,8 @@ directly is on the [roadmap](roadmap.md).
 | `src/depth.rs` | Flattens the DOM below 500 nesting levels (as Blink and WebKit do), and runs work on a thread with a 256 MiB stack. |
 | `src/limits.rs` | Counting global allocator: ends the process with exit status 4 above `--max-memory`. |
 | `src/fetch.rs` | Script loader sandbox: `data:` URLs and `file:` URLs **inside the input directory** only. Paths are canonicalized first, so `..` and symlinks cannot escape. No network. |
-| `src/image.rs` | PNG/JPEG output: lays the DOM out at `--width` with `screen` media, loads local resources through fulgur's sandboxed loader, paints with `blitz-paint` on `vello_cpu`, encodes with `image`. Pages taller than 32 768 pixels are cut off with a warning. |
+| `src/image.rs` | PNG/JPEG output: lays the DOM out with fulgur on one page `--width` wide (no margins), measures the content, renders it again on a page exactly that tall, rasterizes the page with hayro and encodes it with `image`. The image therefore shows what the PDF shows, multi-column layout included. `vh` units follow the viewport (`--height`, or 768), not the page. Pages taller than 32 768 pixels are cut off with a warning. |
+| `src/assets.rs` | Finds the images a page refers to (`<img src>`, `url()` in `style` attributes, `<style>` and linked or `@import`ed stylesheets) and registers the files inside the input directory with fulgur, which draws only registered images. `data:` URLs need no registration. |
 | `src/pdf.rs` | Calls fulgur with page size, margins, title and a base path that confines `<link>`, `<img>` and `@import` to the input directory. |
 | `src/page.rs` | Page sizes (A3–A5, B4, B5, Letter, Legal, Ledger) and length parsing (`mm`, `cm`, `in`, `pt`, `px`). |
 | `src/prefs.rs` | Turns on Stylo features that Blitz leaves off: `:has()`, `:nth-child(… of S)`, container queries. |
@@ -67,11 +68,11 @@ used to find installed fonts.
 | JS ↔ DOM binding | blitz-vibey-script | master | DioxusLabs/blitz | MIT/Apache-2.0 |
 | Pagination, GCPM, PDF layout | fulgur | 0.41 (`blitz-master` port) | fulgur-rs | MIT/Apache-2.0 |
 | PDF writer | krilla, krilla-svg | 0.7 | LaurenzV | MIT/Apache-2.0 |
-| Image output | blitz-paint, anyrender 0.15, vello_cpu 0.4, image 0.25 | | DioxusLabs, linebender, image-rs | MIT/Apache-2.0 |
+| Image output | hayro (on vello_cpu 0.3), image 0.25 | 0.9 | LaurenzV, linebender, image-rs | MIT/Apache-2.0 |
 | SVG | usvg / resvg | 0.45 (PDF), 0.50 (DOM) | linebender | Apache-2.0/MIT |
 | CLI | clap | 4 | | MIT/Apache-2.0 |
 
-`Cargo.lock` pins 446 crates. Release builds use `lto = "fat"`,
+`Cargo.lock` pins 458 crates. Release builds use `lto = "fat"`,
 `codegen-units = 1`, `panic = "abort"` and `strip = true`.
 
 ### Why one Stylo matters
@@ -99,13 +100,17 @@ pull requests.
 | fulgur | Counter attributes in the null namespace, set through the DOM mutator | Blitz 0.3 matches attribute namespaces, so `counter()` / `counters()` in `::before` rendered empty. |
 | Blitz | Outside list markers keep `white-space: pre` (CSS Lists 3 UA style) | Parley 0.13 collapsed the trailing space of `"1. "`, so numbered markers touched the item text (`1.Author`). |
 | fulgur | A captioned table's percentage width moves to the caption wrapper | The `fit-content` caption wrapper made `width:100%` tables shrink to their content width under Blitz 0.3. |
+| fulgur | Variable font coordinates passed to Krilla | Parley picks bold from a variable font (`NotoSans[wght]`) by setting `wght`; Krilla drew the default instance, so bold printed as regular. |
+| fulgur | `data:` images decoded and served | `<img src="data:…">` and `url(data:…)` were silently dropped. |
+| fulgur | `viewport_height` option | Image output lays out on a page as tall as the content; `vh` must still follow the viewport. |
+| Blitz | An `@import` whose URL does not parse is refused | `@import url("http://[::1")` aborted the process (`unwrap()` on `None`). |
 
 ## Resource policy
 
 | Resource | Default |
 |---|---|
 | `<script src>`, `fetch()` | `data:` and files under the input directory; everything else is refused. |
-| `<link>`, `@import`, `<img>`, fonts | Files under the input directory (fulgur's `base_path`); remote URLs are not fetched. |
+| `<link>`, `@import`, `<img>`, CSS images, fonts | Files under the input directory (fulgur's `base_path`) and `data:` URLs; remote URLs are not fetched. |
 | Network | None. There is no HTTP client in the binary. |
 | JavaScript time | Virtual-time budget (`--javascript-delay`, default 200 ms), nested-timer clamping, 10 million loop iterations per call, and a wall-clock watchdog (`--javascript-timeout`, default 30 s; exit status 3). |
 | Memory | `--max-memory`, default 1024 MiB of heap; exit status 4. |

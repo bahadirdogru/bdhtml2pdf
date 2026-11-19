@@ -3,6 +3,7 @@
 //! Blitz master + Boa runs the page's JavaScript and produces the final DOM;
 //! fulgur (ported to Blitz master, same Stylo) lays it out into a vector PDF.
 
+pub mod assets;
 pub mod depth;
 pub mod fetch;
 pub mod image;

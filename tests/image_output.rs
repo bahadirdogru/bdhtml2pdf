@@ -140,3 +140,35 @@ fn local_images_load_and_outside_files_do_not() {
     assert!(near(img.get_pixel(20, 20), [255, 0, 0]), "local image");
     assert!(!near(img.get_pixel(20, 60), [255, 0, 0]), "outside image");
 }
+
+#[test]
+fn multi_column_layout_matches_the_pdf() {
+    let dir = tempdir("columns");
+    let input = page(
+        &dir,
+        "<div style='columns:2;column-gap:0;width:200px'>\
+         <div style='height:50px;background:rgb(255,0,0)'></div>\
+         <div style='height:50px;background:rgb(0,0,255)'></div></div>",
+    );
+    let out = dir.join("out.png");
+    convert(&input, &out, &["--width", "200", "--height", "60"]);
+    let img = image::open(&out).unwrap();
+    assert!(near(img.get_pixel(50, 25), [255, 0, 0]), "first column");
+    assert!(near(img.get_pixel(150, 25), [0, 0, 255]), "second column");
+}
+
+#[test]
+fn viewport_units_follow_the_viewport_not_the_page_length() {
+    let dir = tempdir("vh");
+    let input = page(
+        &dir,
+        "<div style='height:100vh;background:rgb(0,0,255)'></div>\
+         <div style='height:100px;background:rgb(255,0,0)'></div>",
+    );
+    let out = dir.join("out.png");
+    convert(&input, &out, &["--width", "100"]);
+    let img = image::open(&out).unwrap();
+    assert_eq!(img.dimensions(), (100, 868));
+    assert!(near(img.get_pixel(50, 760), [0, 0, 255]));
+    assert!(near(img.get_pixel(50, 860), [255, 0, 0]));
+}

@@ -77,7 +77,7 @@ HTML ─► html5ever ─► Blitz DOM ◄──► Boa JavaScript        (one D
                          ▼
                      Krilla: vector PDF, subset fonts, text as text
 
-Image output: the same DOM ─► Blitz paint ─► vello_cpu ─► PNG / JPEG
+Image output: the same layout on one page as tall as the content ─► hayro ─► PNG / JPEG
 ```
 
 | Component | Role |
@@ -88,7 +88,7 @@ Image output: the same DOM ─► Blitz paint ─► vello_cpu ─► PNG / JPEG
 | [Boa](https://github.com/boa-dev/boa) 0.22 | JavaScript engine, pure Rust |
 | [fulgur](https://github.com/fulgur-rs/fulgur) | paged media (GCPM), pagination, PDF layout (ported by us to current Blitz) |
 | [Krilla](https://github.com/LaurenzV/krilla) | PDF writer |
-| `blitz-paint` + [vello_cpu](https://github.com/linebender/vello) | image output: painting and CPU rasterization |
+| [hayro](https://github.com/LaurenzV/hayro) | image output: rasterizes the PDF page (pure Rust, on vello_cpu) |
 
 All of it is Rust except the system fontconfig. → [docs/architecture.md](docs/architecture.md)
 covers the pipeline, all dependencies with versions and licenses, and the
@@ -118,7 +118,7 @@ copied from [docs/benchmarks/2026-11-19.md](docs/benchmarks/2026-11-19.md).
 | 24-page invoice | 1.07 s · 60 MB | 0.08 s · 16 MB | 0.37 s · 47 MB | 0.71 s · 338 MB (tree) |
 | Install size | **25 MB**, one file ¹ | 13 MB | 39 MB | 432 MB |
 
-¹ 28 MB since image output was added (2.4 MB for the PNG/JPEG painter).
+¹ 31.5 MB since image output was added (the PDF rasterizer and PNG/JPEG encoders).
 
 In short:
 
@@ -194,8 +194,6 @@ Found by our own test suites; details and plans are in [docs/roadmap.md](docs/ro
   in CSS works.
 - **Not supported yet:** container queries, subgrid, Canvas 2D (`<canvas>`
   charts), and the wkhtmltopdf header/footer flags.
-- **Images have no multi-column layout.** fulgur lays out `columns` for the
-  PDF; image output uses Blitz's own layout, which shows them as one column.
 - **Long tables are slower than they should be:** about 1 s for 24 pages.
 - **Build:** depends on patched sibling checkouts of fulgur and Blitz until the
   upstream pull requests are merged.

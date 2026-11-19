@@ -9,7 +9,7 @@
 | Turkish and other languages | Correct glyphs, extractable text, language-sensitive case mapping | Full alphabet, `@font-face`, `text-transform` with `lang="tr"` correct; JS locale functions missing (no `Intl`) |
 | Vector PDF | Text stays text (searchable, selectable), subset fonts, small files | Yes; 0 raster images on text pages |
 | Paged media | `@page`, margin boxes, running headers/footers, page counters, `string-set`, bookmarks, repeated table headers | Inherited from fulgur |
-| Small footprint | Binary < 50 MB, < 100 MB memory for typical documents | Binary 27.7 MB (24.7 MB before image output); 30–50 MB RSS for single-page documents |
+| Small footprint | Binary < 50 MB, < 100 MB memory for typical documents | Binary 31.5 MB (24.7 MB before image output); 30–50 MB RSS for single-page documents |
 | One process, no browser | No Chromium, WebKit or Qt; no helper processes | Yes |
 | Safe defaults | No network; file access confined to the input directory; bounded time and memory | Network, file access, JavaScript time and memory, and deep nesting hold in our suite. |
 | wkhtmltopdf drop-in | Same CLI flags for the common cases | Page size, orientation, margins, title, JavaScript delay, `--window-status`. Header/footer flags not yet. wkhtmltoimage's PNG/JPEG output with `--width`, `--height`, `--zoom`, `--quality`. |

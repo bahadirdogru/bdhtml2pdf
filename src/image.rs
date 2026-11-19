@@ -1,20 +1,24 @@
 //! Raster output (PNG, JPEG), like wkhtmltoimage.
 //!
-//! The page is laid out once at the viewport width with `screen` media and
-//! painted by Blitz (`blitz-paint`) on the CPU (`vello_cpu`). Local resources
-//! load through fulgur's loader, so the PDF and the image see the same files
-//! and the same sandbox (only files inside the input directory).
+//! The image is the PDF layout on a single page as wide as the viewport and
+//! as tall as the content, rasterized by hayro. It therefore shows exactly
+//! what the PDF shows: multi-column layout, table fragmentation and GCPM
+//! included. fulgur lays the page out with `screen` media, as wkhtmltoimage
+//! does, and loads local resources through the same sandbox as the PDF.
 
 use std::io::Cursor;
 use std::path::Path;
 
-use anyrender::{AntiAliasing, PaintScene as _, render_to_buffer};
-use anyrender_vello_cpu::VelloCpuImageRenderer;
+use hayro::hayro_interpret::InterpreterSettings;
+use hayro::hayro_syntax::Pdf;
+use hayro::vello_cpu::color::palette::css::WHITE;
+use hayro::{PixmapSettings, RenderCache, RenderSettings};
 use image::codecs::jpeg::JpegEncoder;
 use image::codecs::png::PngEncoder;
 use image::{ExtendedColorType, ImageEncoder};
-use peniko::kurbo::{Affine, Rect};
-use peniko::{Color, Fill};
+
+use crate::PageOptions;
+use crate::pdf::{first_page_extent, render_pdf_with_viewport};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ImageFormat {
@@ -47,20 +51,23 @@ impl Default for ImageOptions {
     }
 }
 
-/// Viewport height for `vh` units and for pages shorter than one screen
-/// when capturing the whole page.
+/// Viewport height for `vh` units, and the smallest image height when
+/// capturing the whole page.
 pub const DEFAULT_VIEWPORT_HEIGHT: u32 = 768;
 
-/// The largest image side in device pixels. Larger pages are cut off at the
+/// The largest image side in device pixels. Longer pages are cut off at the
 /// bottom (and reported); a 1024-pixel-wide image of this height takes
 /// 128 MiB as RGBA.
 pub const MAX_IMAGE_SIDE: u32 = 32_768;
+
+/// CSS pixels to PDF points.
+const PX_TO_PT: f32 = 0.75;
 
 pub struct RenderedImage {
     pub bytes: Vec<u8>,
     pub width: u32,
     pub height: u32,
-    /// The page was taller than [`MAX_IMAGE_SIDE`] and was cut off.
+    /// The page was longer than [`MAX_IMAGE_SIDE`] and was cut off.
     pub truncated: bool,
 }
 
@@ -76,59 +83,65 @@ pub fn render_image(
     if !(opts.zoom > 0.0 && opts.zoom.is_finite()) {
         return Err(format!("invalid zoom {}", opts.zoom));
     }
-    let viewport_height = opts.height.unwrap_or(DEFAULT_VIEWPORT_HEIGHT);
-    let (mut doc, _, _) = fulgur::blitz_adapter::parse_html_with_local_resources(
-        html,
-        opts.width as f32,
-        viewport_height,
-        &[],
-        true,
-        Some(base_dir),
-    );
-    doc.resolve(0.0);
-
-    let css_height = match opts.height {
-        Some(h) => h as f32,
-        None => {
-            let layout = doc.root_element().final_layout();
-            layout.size.height.max(viewport_height as f32)
-        }
-    };
-    let scale = opts.zoom as f64;
-    let device = |css: f32| ((css as f64 * scale).ceil() as u64).max(1);
-    let (want_w, want_h) = (device(opts.width as f32), device(css_height));
-    let width = want_w.min(MAX_IMAGE_SIDE as u64) as u32;
-    let height = want_h.min(MAX_IMAGE_SIDE as u64) as u32;
-    let truncated = want_h > height as u64;
-    if want_w > width as u64 {
+    let max_css = MAX_IMAGE_SIDE as f32 / opts.zoom;
+    if opts.width as f32 > max_css {
         return Err(format!(
-            "image is {want_w} pixels wide; the limit is {MAX_IMAGE_SIDE} (lower --width or --zoom)"
+            "image would be {} pixels wide; the limit is {MAX_IMAGE_SIDE} (lower --width or --zoom)",
+            (opts.width as f32 * opts.zoom).ceil()
         ));
     }
+    let page = |height_px: f32| PageOptions {
+        width: opts.width as f32 * PX_TO_PT,
+        height: height_px * PX_TO_PT,
+        margin_top: 0.0,
+        margin_right: 0.0,
+        margin_bottom: 0.0,
+        margin_left: 0.0,
+    };
 
-    let rgba = render_to_buffer::<VelloCpuImageRenderer, _>(
-        |scene| {
-            scene.fill(
-                Fill::NonZero,
-                Affine::IDENTITY,
-                Color::WHITE,
-                None,
-                &Rect::new(0.0, 0.0, width as f64, height as f64),
-                AntiAliasing::Enabled,
-            );
-            blitz_paint::paint_scene(scene, &mut doc, scale, width, height, 0, 0);
+    // `vh` units and `height: 100%` on the root follow the viewport, as in a
+    // browser, not the page, which is only as tall as the image.
+    let viewport = opts.height.unwrap_or(DEFAULT_VIEWPORT_HEIGHT) as f32;
+    let (height_px, truncated) = match opts.height {
+        Some(h) => ((h as f32).min(max_css), h as f32 > max_css),
+        None => {
+            // Lay out on the tallest page an image may have, then size the
+            // page to the content.
+            let (bottom, more) = first_page_extent(html, base_dir, &page(max_css), Some(viewport))?;
+            let bottom = bottom.max(viewport).min(max_css);
+            (bottom.ceil(), more)
+        }
+    };
+
+    let pdf = render_pdf_with_viewport(html, base_dir, &page(height_px), None, Some(viewport))?;
+    let pdf = Pdf::new(pdf).map_err(|e| format!("cannot read the generated PDF: {e:?}"))?;
+    let first = pdf
+        .pages()
+        .first()
+        .ok_or("the generated PDF has no pages")?;
+    // PDF points to device pixels.
+    let scale = opts.zoom / PX_TO_PT;
+    let pixmap = hayro::render(
+        first,
+        &RenderCache::new(),
+        &InterpreterSettings::default(),
+        &RenderSettings::default(),
+        &PixmapSettings {
+            x_scale: scale,
+            y_scale: scale,
+            bg_color: WHITE,
         },
-        width,
-        height,
     );
+    let (width, height) = (pixmap.width() as u32, pixmap.height() as u32);
+    // The background is opaque, so premultiplied and straight RGBA agree.
+    let rgba = pixmap.data_as_u8_slice();
 
     let mut bytes = Vec::new();
     match opts.format {
         ImageFormat::Png => PngEncoder::new(Cursor::new(&mut bytes))
-            .write_image(&rgba, width, height, ExtendedColorType::Rgba8)
+            .write_image(rgba, width, height, ExtendedColorType::Rgba8)
             .map_err(|e| format!("PNG encoding failed: {e}"))?,
         ImageFormat::Jpeg => {
-            // The background is opaque white, so dropping alpha is lossless.
             let rgb: Vec<u8> = rgba
                 .as_chunks::<4>()
                 .0
