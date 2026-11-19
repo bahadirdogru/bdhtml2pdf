@@ -11,7 +11,7 @@
 | Paged media | `@page`, margin boxes, running headers/footers, page counters, `string-set`, bookmarks, repeated table headers | Inherited from fulgur |
 | Small footprint | Binary < 50 MB, < 100 MB memory for typical documents | Binary 24.7 MB; 30–50 MB RSS for single-page documents |
 | One process, no browser | No Chromium, WebKit or Qt; no helper processes | Yes |
-| Safe defaults | No network; file access confined to the input directory; bounded time and memory | Network, file access, JavaScript time and memory hold in our suite. Very deep nesting is not yet bounded (see Known issues). |
+| Safe defaults | No network; file access confined to the input directory; bounded time and memory | Network, file access, JavaScript time and memory, and deep nesting hold in our suite. |
 | wkhtmltopdf drop-in | Same CLI flags for the common cases | Page size, orientation, margins, title, JavaScript delay, `--window-status`. Header/footer flags not yet. |
 | Measured, reproducible claims | Every release ships benchmark and security results | `bench/run.sh`, `bench/security.sh`, [benchmarks/](benchmarks/README.md) |
 
@@ -20,7 +20,7 @@
 | Issue | Impact | Plan |
 |---|---|---|
 | A JavaScript watchdog timeout ends the whole process: Boa cannot interrupt a running script from outside. | A library user that embeds bdhtml2pdf in a long-running service loses the process on a stuck script. | Convert each document in a child process; ask Boa upstream for an interrupt hook. |
-| Very deep nesting. Between about 3 000 and 3 500 nested elements, rendering jumps from 0.04 s to 35–50 s. At 20 000 levels the process aborts, probably from stack exhaustion. | DoS; generated HTML is rarely this deep. | Find the non-linear step (style, layout or fulgur conversion). Add a depth limit with a clear error, and run the pipeline on a thread with a large stack. |
+| HTML parsing is quadratic in nesting depth. html5ever looks for an open `<p>` through the whole stack of open elements on every block start tag. 20 000 levels parse in about 1 s, 40 000 in 4.5 s, 80 000 in 27 s. | DoS with extremely deep input. With JavaScript on, `--javascript-timeout` ends it (exit 3); with `-n` nothing does. | Upstream html5ever: count the open `<p>` elements so that the check is O(1) when there are none. |
 | Ligature glyphs lose their text in the PDF: `office` extracts as `ofce`. | Search and copy-paste break on words with fi/fl/ffl ligatures. | Map each ligature glyph to its whole cluster text in the ToUnicode CMap (fulgur → Krilla glyph-to-text ranges). Not caused by the port: fulgur's own committed upstream example PDFs show the same loss (`Ofce`, `Workfow`). |
 | No `Intl` in Boa as built. | `Intl.NumberFormat`, `toLocaleUpperCase('tr-TR')` and `localeCompare(…, 'tr')` fail in JavaScript. CSS-side Turkish casing works. | Enable Boa's `intl` feature (ICU4X data) and measure the binary size cost. Possibly ship a reduced locale set. |
 | Container queries | `@container` rules never match. | Blitz/Stylo integration: supply container sizes to Stylo during layout. |
@@ -35,7 +35,9 @@
    - ✅ Bounded JavaScript execution: loop limit, HTML timer clamping, and a
      wall-clock watchdog.
    - ✅ A memory limit (`--max-memory`).
-   - A depth limit and a large stack for very deep HTML.
+   - ✅ Very deep HTML: content below 500 levels moves up to that level, as
+     in Blink and WebKit, and parsing, layout and PDF output run on a thread
+     with a 256 MiB stack.
    - A `--allow` list for extra directories.
    - An optional, explicit network allow-list (off by default).
 2. **Upstreaming.** Blitz: public `LayoutPassState` and `svg_source`, the

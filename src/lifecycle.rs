@@ -16,6 +16,8 @@
 //!   microtasks, catastrophic regular expressions), the caller gets
 //!   [`JsTimeout`] and can end the process.
 //! - Memory: see [`crate::limits`].
+//!
+//! The final DOM is flattened below [`crate::depth::MAX_NESTING_DEPTH`].
 
 use std::path::{Path, PathBuf};
 use std::sync::mpsc;
@@ -108,7 +110,7 @@ pub fn run_scripts_bounded(
     std::thread::Builder::new()
         .name("javascript".into())
         // Boa and deep DOM recursion need more than the 2 MiB default.
-        .stack_size(256 << 20)
+        .stack_size(crate::depth::LARGE_STACK)
         .spawn(move || {
             let _ = tx.send(run_scripts(&html, &base_dir, &opts));
         })
@@ -205,11 +207,9 @@ pub fn run_scripts(html: &str, base_dir: &Path, opts: &JsOptions) -> std::io::Re
     }
 
     let html = {
-        let guard = doc.inner();
-        let root = guard.root_element();
-        let mut out = String::from("<!DOCTYPE html>");
-        root.write_outer_html(&mut out);
-        out
+        let mut guard = doc.inner_mut();
+        crate::depth::flatten_deep_nesting(&mut guard);
+        crate::depth::serialize(&guard)
     };
 
     Ok(JsResult {

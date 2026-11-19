@@ -106,7 +106,7 @@ copied from [docs/benchmarks/2026-11-19.md](docs/benchmarks/2026-11-19.md).
 | 1000-row invoice: pagination and repeated headers | ✅ | ✅ | ✅ | ✅ |
 | Vector output (raster images on text pages) | **0** | 0 | 0 | 0 |
 | File reads and SSRF blocked (11 attacks) | **11/11** | 11/11 | 9/11 | 1/11 |
-| Denial-of-service cases handled (5) | **4/5** (deep nesting aborts) | 4/5 (no JS) | 3/5 | 3/5 |
+| Denial-of-service cases handled (5) | **5/5** | 4/5 (no JS) | 3/5 | 3/5 |
 | Typical one-page document | **0.07 s · 31 MB** | 0.02 s · 10 MB | 0.24 s · 35 MB | 0.36 s · 250 MB RSS (190 MB tree) |
 | React app with timers | **0.16 s · 48 MB** | — | — | 0.38 s · 249 MB |
 | 24-page invoice | 1.07 s · 60 MB | 0.08 s · 16 MB | 0.37 s · 47 MB | 0.71 s · 338 MB (tree) |
@@ -122,7 +122,7 @@ In short:
 - It is still slower than the native, JavaScript-free sghtmltopdf on static
   pages, and slower than everyone on very long tables.
 - Hostile JavaScript (endless loops, timer floods, memory bombs) is stopped
-  by built-in limits. Very deep HTML nesting can still abort the process.
+  by built-in limits. Very deep HTML nesting is flattened, as browsers do.
 
 Full tables, method and raw output: [docs/benchmarks/](docs/benchmarks/README.md).
 
@@ -176,8 +176,9 @@ security finding blocks the release or is listed as a known issue.
 
 Found by our own test suites; details and plans are in [docs/roadmap.md](docs/roadmap.md#known-issues).
 
-- **Very deep nesting.** More than about 3 000 nested elements makes rendering
-  very slow (35–50 s), and 20 000 levels aborts the process.
+- **Extremely deep nesting parses slowly.** 20 000 nested elements take about
+  1 s, but HTML parsing time grows with the square of the depth: 80 000
+  levels take about 27 s. With JavaScript on, `--javascript-timeout` bounds it.
 - **Ligature text.** Words with fi/fl/ffl ligatures lose those letters in
   extracted text: `office` → `ofce`.
 - **No `Intl` in JavaScript.** `toLocaleUpperCase('tr-TR')`,

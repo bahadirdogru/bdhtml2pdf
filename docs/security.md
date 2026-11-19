@@ -85,7 +85,7 @@ Summary:
 
 | Engine (defaults) | File reads and escapes (8) | SSRF (3) | Denial of service (5) |
 |---|---|---|---|
-| **bdhtml2pdf** | ✅ 8/8 blocked | ✅ 3/3 blocked | ✅ `while(true)` stopped in 0.15 s · ✅ JS memory bomb stopped in 3.8 s at 47 MB · ✅ timer flood ends in 0.07 s · ✅ billion laughs · ⚠️ 20 000-level nesting aborts (stack) |
+| **bdhtml2pdf** | ✅ 8/8 blocked | ✅ 3/3 blocked | ✅ `while(true)` stopped in 0.15 s · ✅ JS memory bomb stopped in 3.8 s at 47 MB · ✅ timer flood ends in 0.07 s · ✅ billion laughs · ✅ 20 000-level nesting renders in 1.1 s |
 | sghtmltopdf | ✅ 8/8 | ✅ 3/3 | ✅ for the JS cases, because it has no JavaScript · ⚠️ deep nesting exits with an error |
 | wkhtmltopdf | ✅ 8/8 (local file access is off by default since 0.12.6) | ❌ HTML/CSS and JavaScript (image, XHR, WebSocket) reach the internal server | ❌ billion laughs: OOM at 2 GB · ❌ deep nesting: SIGSEGV · ✅ loops are stopped after about 10 s |
 | headless Chromium | ❌ 6/8 leak: `/etc/passwd` through iframe, object, navigation and meta refresh; outside CSS, JS and symlinks load | ❌ HTML/CSS, JS (fetch, XHR, Image, WebSocket) and inline SVG | ❌ `while(true)` hangs · ❌ memory bomb: OOM at 2 GB · ✅ the rest |
@@ -98,9 +98,23 @@ What this means:
 - **wkhtmltopdf** still has the SSRF class of CVE-2022-35583 with default
   settings.
 - **bdhtml2pdf** holds the file and network boundaries, and bounds hostile
-  JavaScript in time and memory by default. Very deep HTML nesting can still
-  abort the process (see [roadmap](roadmap.md#known-issues)), so keep the
-  hardening advice below for untrusted input.
+  JavaScript in time and memory by default, and flattens very deep HTML.
+  Parsing extremely deep HTML (tens of thousands of levels) is still slow
+  (see [roadmap](roadmap.md#known-issues)), so keep the hardening advice
+  below for untrusted input.
+
+## Deep nesting
+
+Style, layout and PDF conversion recurse once per nesting level, and fulgur
+skips content below 512 levels. bdhtml2pdf therefore:
+
+- moves everything below 500 levels up to that level in document order, as
+  the HTML parsers of Blink and WebKit do at 512 (`src/depth.rs`). Text and
+  images stay; styling inherited through the removed levels is lost;
+- runs parsing, layout and PDF output on threads with a 256 MiB stack.
+
+20 000 nested `<div>`s render in about 1 s, with or without JavaScript, and
+the deepest text is in the PDF. Covered by `tests/deep_nesting.rs`.
 
 ## JavaScript limits in detail
 

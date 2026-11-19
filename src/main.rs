@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::Duration;
 
+use bdhtml2pdf::depth::with_large_stack;
 use bdhtml2pdf::limits::{EXIT_JS_TIMEOUT, LimitedAlloc, set_memory_limit};
 use bdhtml2pdf::page::{NAMED_SIZES, length_pt, named_size};
 use bdhtml2pdf::{JsOptions, JsTimeout, PageOptions};
@@ -127,7 +128,7 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let dom_html = if cli.disable_javascript {
-        html
+        with_large_stack(|| bdhtml2pdf::depth::flatten_html(html))
     } else {
         let js = JsOptions {
             delay: Duration::from_millis(cli.javascript_delay),
@@ -155,7 +156,9 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     let out = if cli.output.to_ascii_lowercase().ends_with(".html") {
         dom_html.into_bytes()
     } else {
-        bdhtml2pdf::render_pdf(&dom_html, &base_dir, &page, cli.title.as_deref())?
+        with_large_stack(|| {
+            bdhtml2pdf::render_pdf(&dom_html, &base_dir, &page, cli.title.as_deref())
+        })?
     };
     if cli.output == "-" {
         std::io::Write::write_all(&mut std::io::stdout(), &out)?;

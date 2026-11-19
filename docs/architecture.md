@@ -41,6 +41,7 @@ directly is on the [roadmap](roadmap.md).
 |---|---|
 | `src/main.rs` | wkhtmltopdf-compatible CLI: `input output`, `--page-size`, `--orientation`, `--page-width/height`, `--margin-*`, `--title`, `--disable-javascript`, `--javascript-delay`, `--window-status`, `--javascript-timeout`, `--javascript-loop-limit`, `--max-memory`, `--debug-javascript`, `-q`. An output name ending in `.html` writes the post-JavaScript DOM instead of a PDF. |
 | `src/lifecycle.rs` | Render lifecycle on `ScriptDocument`: no timer thread, **virtual time**. A `setTimeout(fn, 5000)` costs no real waiting, and the result does not depend on machine speed. Also sets the loop limit, clamps nested zero-delay timers as browsers do, and runs JavaScript on a worker thread under a wall-clock watchdog. |
+| `src/depth.rs` | Flattens the DOM below 500 nesting levels (as Blink and WebKit do), and runs work on a thread with a 256 MiB stack. |
 | `src/limits.rs` | Counting global allocator: ends the process with exit status 4 above `--max-memory`. |
 | `src/fetch.rs` | Script loader sandbox: `data:` URLs and `file:` URLs **inside the input directory** only. Paths are canonicalized first, so `..` and symlinks cannot escape. No network. |
 | `src/pdf.rs` | Calls fulgur with page size, margins, title and a base path that confines `<link>`, `<img>` and `@import` to the input directory. |
