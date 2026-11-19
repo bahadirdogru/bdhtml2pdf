@@ -7,15 +7,15 @@ license = "GPL-3.0-or-later"
 description = "Lightweight HTML / JavaScript to PDF engine (modern wkhtmltopdf successor)"
 
 [dependencies]
-# DOM + Stylo + Taffy + Parley, ve Boa JS binding'i (blitz-vibey-script).
-# Blitz master'dan sabit rev ile; vibey-script crates.io'da yayınlanmıyor.
+# DOM + Stylo + Taffy + Parley, and the Boa JS bindings (blitz-vibey-script).
+# Pinned to a Blitz master rev; vibey-script is not published on crates.io.
 blitz-dom = { git = "https://github.com/DioxusLabs/blitz", rev = "b4ad543def00146850352c3da5dbc027f9053015", default-features = false, features = ["svg", "woff", "system-fonts"] }
 blitz-html = { git = "https://github.com/DioxusLabs/blitz", rev = "b4ad543def00146850352c3da5dbc027f9053015" }
 blitz-traits = { git = "https://github.com/DioxusLabs/blitz", rev = "b4ad543def00146850352c3da5dbc027f9053015" }
 blitz-vibey-script = { git = "https://github.com/DioxusLabs/blitz", rev = "b4ad543def00146850352c3da5dbc027f9053015" }
 
-# PDF backend: fulgur, Blitz master'a taşınmış yerel dal (../fulgur, branch
-# blitz-master). Tek Stylo (0.24) — JS'in kullandığı DOM ile aynı motor.
+# PDF backend: fulgur, a local branch ported to Blitz master (../fulgur, branch
+# blitz-master). One Stylo (0.24): the same engine as the DOM that JS uses.
 fulgur = { path = "../fulgur/crates/fulgur" }
 
 # Stylo runtime prefs: Blitz leaves `:has()`, `:nth-child(of S)` and container
@@ -34,8 +34,8 @@ codegen-units = 1
 panic = "abort"
 strip = true
 
-# fulgur ile aynı Blitz kopyasını kullan: yerel klon (rev b4ad543 + `LayoutPassState`
-# ve `Node::svg_source` public yapan yama). Upstream'e PR olarak gönderilecek.
+# Use the same Blitz copy as fulgur: a local clone (rev b4ad543 plus the patches
+# on branch public-layout-pass). They are submitted upstream; see docs/roadmap.md.
 [patch."https://github.com/DioxusLabs/blitz"]
 blitz-dom = { path = "../blitz/packages/blitz-dom" }
 blitz-html = { path = "../blitz/packages/blitz-html" }

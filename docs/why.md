@@ -87,7 +87,7 @@ this repository.
 | [OxiBrowser](https://github.com/project-oxi/oxibrowser) | Headless browser for AI agents: Boa + Blitz | Its PDF is a raster screenshot (no selectable text, large files). Its separate JS DOM failed to run React, Vue and Preact in our tests, and the binary is 68.8 MB. |
 | [litehtml](https://github.com/litehtml/litehtml) | C++ HTML/CSS layout | No JavaScript, no PDF. We would have had to write both. |
 
-The detailed research log (in Turkish) is in [arastirma.md](arastirma.md).
+The detailed research log is in [research.md](research.md).
 
 ## The decision
 

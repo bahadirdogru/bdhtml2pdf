@@ -87,6 +87,6 @@ Then:
 
 - `bench/compare.sh`: Blitz (bdhtml2pdf's JS stage) against OxiBrowser on DOM
   output. This was used to choose Blitz over OxiBrowser; see
-  [../arastirma.md](../arastirma.md).
+  [../research.md](../research.md).
 - `bench/compare-sgh.sh`: a quick two-engine run against sghtmltopdf. It is
   superseded by `bench/run.sh`.

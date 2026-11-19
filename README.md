@@ -241,7 +241,7 @@ bench/security.sh
 | [docs/security.md](docs/security.md) | threat model, defaults, security suite |
 | [docs/benchmarks/](docs/benchmarks/README.md) | method, release procedure, results per release |
 | [docs/roadmap.md](docs/roadmap.md) | goals, status, known issues, roadmap |
-| [docs/arastirma.md](docs/arastirma.md) | original research notes (Turkish) |
+| [docs/research.md](docs/research.md) | original research notes: candidates, the Stylo blocker, early measurements |
 
 ## License
 
