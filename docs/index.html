@@ -330,17 +330,16 @@
       <li>
         <div>
           <h3>Check out the sources</h3>
-          <p>Until the upstream pull requests are merged, the build expects patched fulgur and Blitz next to it.</p>
+          <p>Until the upstream pull requests are merged, the build expects patched fulgur and Blitz next to it, at the commits CI builds.</p>
 <pre class="code"><code>git clone https://github.com/bahadirdogru/bdhtml2pdf
-git clone -b blitz-master https://github.com/bahadirdogru/fulgur
-git clone -b public-layout-pass https://github.com/bahadirdogru/blitz</code></pre>
+cd bdhtml2pdf
+scripts/upstream.sh fetch  <span class="c"># ../fulgur and ../blitz</span></code></pre>
         </div>
       </li>
       <li>
         <div>
           <h3>Build</h3>
-<pre class="code"><code>cd bdhtml2pdf
-cargo build --release      <span class="c"># target/release/bdhtml2pdf</span></code></pre>
+<pre class="code"><code>cargo build --release      <span class="c"># target/release/bdhtml2pdf</span></code></pre>
         </div>
       </li>
       <li>

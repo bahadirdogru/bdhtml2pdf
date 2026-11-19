@@ -73,6 +73,17 @@ Then:
    top-level README.
 3. A regression in a correctness check or a new security finding blocks the
    release, or is listed under *Known issues* in the README with an issue link.
+4. Set `version` in `Cargo.toml` (and the README status badge), run
+   `cargo build` to update `Cargo.lock`, and commit with the results file.
+   Make sure `.github/upstream.env` pins the fulgur and Blitz commits that
+   were measured (`scripts/upstream.sh pin`).
+5. Tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`. The
+   [release workflow](../../.github/workflows/release.yml) checks that the
+   tag matches `Cargo.toml`, builds Linux (x86_64, aarch64, on Debian 12),
+   macOS (Apple silicon) and Windows (x86_64) binaries, and opens a **draft**
+   release with them and their SHA-256 sums. 0.x versions are marked as
+   pre-releases.
+6. Review the draft's notes on GitHub and publish it.
 
 ### Getting the other engines
 

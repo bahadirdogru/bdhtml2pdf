@@ -5,6 +5,7 @@
 **HTML + JavaScript → vector PDF, in one small process.**<br>
 A modern successor to wkhtmltopdf. No Chromium, no WebKit, no Qt.
 
+[![CI](https://github.com/bahadirdogru/bdhtml2pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/bahadirdogru/bdhtml2pdf/actions/workflows/ci.yml)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 [![Rust 1.92+](https://img.shields.io/badge/rust-1.92%2B-orange)](#building)
 [![Status: pre-release](https://img.shields.io/badge/status-pre--release%200.1.0-yellow)](#known-issues)
@@ -46,6 +47,11 @@ one process of about 31 MB, written in Rust.
 > before using it on untrusted input.
 
 ## Quick start
+
+Download a binary from [Releases](https://github.com/bahadirdogru/bdhtml2pdf/releases)
+(Linux x86_64 and aarch64, macOS on Apple silicon, Windows x86_64), or
+[build it](#building). On Linux it needs fontconfig (`libfontconfig1` /
+`fontconfig`), which desktop and most server installs already have.
 
 ```sh
 bdhtml2pdf invoice.html invoice.pdf
@@ -282,7 +288,9 @@ Requirements: Rust 1.92+ and the fontconfig development files
 (`fontconfig-devel` on Fedora, `libfontconfig1-dev` on Debian/Ubuntu).
 
 Until the remaining upstream pull requests land, the build expects patched
-checkouts next to this repository:
+checkouts next to this repository, at the commits pinned in
+[`.github/upstream.env`](.github/upstream.env).
+`scripts/upstream.sh fetch` checks them out:
 
 ```
 ../fulgur   github.com/bahadirdogru/fulgur, branch blitz-master  (fulgur-rs/fulgur#969)
@@ -292,11 +300,21 @@ checkouts next to this repository:
 ```
 
 ```sh
+scripts/upstream.sh fetch      # ../fulgur and ../blitz at the pinned commits
 cargo build --release          # → target/release/bdhtml2pdf
 cargo test --release           # release: Boa is slow in debug builds
 bench/run.sh -n 5              # optional engines: SGH=… WK=… CHROME=…
 bench/security.sh
 ```
+
+After committing and pushing a change in `../fulgur` or `../blitz`, record the
+new commits with `scripts/upstream.sh pin` so CI builds against them.
+
+[CI](.github/workflows/ci.yml) runs `cargo fmt`, `clippy` and the tests on
+Linux (x86_64, aarch64), macOS and Windows. Pushing a `vX.Y.Z` tag runs
+[release.yml](.github/workflows/release.yml): it builds the binaries and opens
+a draft GitHub release (see the
+[release procedure](docs/benchmarks/README.md#release-procedure)).
 
 ## Goals
 
