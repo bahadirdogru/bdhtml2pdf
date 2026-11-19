@@ -29,13 +29,13 @@ JavaScript: React, Vue, Preact or plain DOM code. It styles the page with
 **Firefox's CSS engine**, paginates it with print CSS, and writes a **vector
 PDF** with real, searchable text and subset fonts. It can also write **PNG or
 JPEG** images of the same layout, like wkhtmltoimage. All of this happens in
-one process of about 31 MB, written in Rust.
+one process of about 22 MB, written in Rust.
 
 |  |  |
 |---|---|
 | ⚡ **Modern web** | ES2022+ JavaScript, React 18 / Vue 3 / Preact, CSS nesting, `:has()`, `@layer`, grid, flex, multi-column, `oklch()` and `color-mix()` |
 | 📄 **Real PDF** | text stays text, fonts are subset, `@page` and margin boxes, running headers, counters, repeated table headers |
-| 🪶 **Small** | one 31 MB binary, ~30–50 MB of memory per page, 0.07 s for a typical document |
+| 🪶 **Small** | one 22 MB binary, ~30–50 MB of memory per page, 0.09 s for a typical document |
 | 🔒 **Safe by default** | no network, files confined to the input directory, bounded JavaScript |
 | 🇹🇷 **Turkish first** | the whole alphabet in every face, `lang="tr"` case mapping: `istanbul` → **İSTANBUL** |
 | 🖼️ **Images too** | PNG and JPEG from the PDF layout, so multi-column text and pagination look the same |
@@ -235,12 +235,12 @@ process's RSS, plus the whole process tree for Chromium). Copied from
 | Vector output (raster images on text pages) | **0** | 0 | 0 | 0 |
 | File reads and SSRF blocked (11 attacks) | **11/11** | 11/11 | 9/11 | 1/11 |
 | Denial-of-service cases handled (5) | **5/5** | 4/5 (no JS) | 3/5 | 3/5 |
-| Typical one-page document | **0.07 s · 31 MB** | 0.02 s · 10 MB | 0.24 s · 35 MB | 0.36 s · 250 MB RSS (190 MB tree) |
-| React app with timers | **0.16 s · 48 MB** | — | — | 0.38 s · 249 MB |
-| 24-page invoice | 1.07 s · 60 MB | 0.08 s · 16 MB | 0.37 s · 47 MB | 0.71 s · 338 MB (tree) |
-| Install size | **25 MB**, one file ¹ | 13 MB | 39 MB | 432 MB |
+| Typical one-page document | **0.09 s · 31 MB** ² | 0.02 s · 10 MB | 0.24 s · 35 MB | 0.36 s · 250 MB RSS (190 MB tree) |
+| React app with timers | **0.20 s · 49 MB** ² | — | — | 0.38 s · 249 MB |
+| 24-page invoice | 1.16 s · 65 MB ² | 0.08 s · 16 MB | 0.37 s · 47 MB | 0.71 s · 338 MB (tree) |
+| Install size | **22 MB**, one file ² | 13 MB | 39 MB | 432 MB |
 
-<sub>¹ 31.5 MB since image output was added (the PDF rasterizer and PNG/JPEG encoders).</sub>
+<sub>² bdhtml2pdf measured again on 2026-11-20 after the size and memory work, with image output included ([results](docs/benchmarks/2026-11-20.md)). The other engines are from 2026-11-19.</sub>
 
 **In short:** bdhtml2pdf is the only engine besides Chromium that runs modern
 JavaScript apps and modern CSS, with about **1/8 of Chromium's memory and

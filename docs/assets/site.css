@@ -187,7 +187,7 @@ h3 { margin: 0; font-size: 1.12rem; letter-spacing: -.01em; }
 .bars .us .name { color: var(--ink); font-weight: 700; }
 .bars .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
 .bars .w31 { width: 12.4%; } .bars .w10 { width: 4%; } .bars .w35 { width: 14%; } .bars .w250 { width: 100%; }
-.bars .s31 { width: 7.3%; } .bars .s13 { width: 3%; } .bars .s39 { width: 9%; } .bars .s432 { width: 100%; }
+.bars .s22 { width: 5.1%; } .bars .s13 { width: 3%; } .bars .s39 { width: 9%; } .bars .s432 { width: 100%; }
 
 .table-wrap { margin-top: 24px; overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
 table { width: 100%; border-collapse: collapse; font-size: 15px; }

@@ -117,7 +117,7 @@
       <article class="card">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 100 18 9 9 0 000-18z"/><path d="M12 7v5l3 2"/></svg></div>
         <h3>Small and fast</h3>
-        <p>One 31 MB binary and one process. About 30–50 MB of memory and 0.07 s for a typical page; a React app with timers takes 0.16 s.</p>
+        <p>One 22 MB binary and one process. About 30–50 MB of memory and 0.09 s for a typical page; a React app with timers takes 0.2 s.</p>
       </article>
       <article class="card">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
@@ -228,7 +228,7 @@
   <div class="wrap">
     <p class="kicker">Results</p>
     <h2 id="results-title">Measured, not claimed</h2>
-    <p class="intro">The same pages went through four engines with default settings on one machine (i7-12800H, Fedora 45, median of 5 runs, 19 November 2026). Results are read back from the PDFs; nothing is judged by eye.</p>
+    <p class="intro">The same pages went through four engines with default settings on one machine (i7-12800H, Fedora 45, median of 5 runs, 19 November 2026; bdhtml2pdf measured again on 20 November). Results are read back from the PDFs; nothing is judged by eye.</p>
     <div class="charts">
       <figure class="chart">
         <figcaption><b>Memory for a one-page document</b><span>Largest process, MB. Lower is better.</span></figcaption>
@@ -242,7 +242,7 @@
       <figure class="chart">
         <figcaption><b>Install size</b><span>MB on disk. Lower is better.</span></figcaption>
         <ul class="bars">
-          <li class="us"><span class="name">bdhtml2pdf</span><span class="track"><span class="bar s31"></span></span><span class="val">31.5 MB</span></li>
+          <li class="us"><span class="name">bdhtml2pdf</span><span class="track"><span class="bar s22"></span></span><span class="val">22 MB</span></li>
           <li><span class="name">sghtmltopdf</span><span class="track"><span class="bar s13"></span></span><span class="val">13 MB</span></li>
           <li><span class="name">wkhtmltopdf</span><span class="track"><span class="bar s39"></span></span><span class="val">39 MB</span></li>
           <li><span class="name">Chromium</span><span class="track"><span class="bar s432"></span></span><span class="val">432 MB</span></li>
@@ -262,13 +262,13 @@
           <tr><th scope="row">HTML parsing (7)</th><td class="us">7</td><td>7</td><td>6</td><td>7</td></tr>
           <tr><th scope="row">Turkish (15)</th><td class="us">12</td><td>8</td><td>8</td><td>14</td></tr>
           <tr><th scope="row">Fonts (8)</th><td class="us">7</td><td>7</td><td>6</td><td>8</td></tr>
-          <tr><th scope="row">One-page document</th><td class="us">0.07 s</td><td>0.02 s</td><td>0.24 s</td><td>0.36 s</td></tr>
-          <tr><th scope="row">React app with timers</th><td class="us">0.16 s</td><td>—</td><td>—</td><td>0.38 s</td></tr>
-          <tr><th scope="row">24-page invoice</th><td class="us">1.07 s</td><td>0.08 s</td><td>0.37 s</td><td>0.71 s</td></tr>
+          <tr><th scope="row">One-page document</th><td class="us">0.09 s</td><td>0.02 s</td><td>0.24 s</td><td>0.36 s</td></tr>
+          <tr><th scope="row">React app with timers</th><td class="us">0.20 s</td><td>—</td><td>—</td><td>0.38 s</td></tr>
+          <tr><th scope="row">24-page invoice</th><td class="us">1.16 s</td><td>0.08 s</td><td>0.37 s</td><td>0.71 s</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="note">bdhtml2pdf is the only engine besides Chromium that runs modern JavaScript apps and modern CSS, with about an eighth of its memory. It is slower than the JavaScript-free sghtmltopdf on static pages and slower than all of them on very long tables. The install size was 25 MB in the benchmark run and is 31.5 MB since image output was added. <a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/benchmarks/2026-11-19.md">Full results and method</a>.</p>
+    <p class="note">bdhtml2pdf is the only engine besides Chromium that runs modern JavaScript apps and modern CSS, with about an eighth of its memory. It is slower than the JavaScript-free sghtmltopdf on static pages and slower than all of them on very long tables. <a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/benchmarks/2026-11-19.md">Full results and method</a>; <a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/benchmarks/2026-11-20.md">bdhtml2pdf on 20 November</a>.</p>
   </div>
 </section>
 
