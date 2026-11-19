@@ -29,7 +29,7 @@
 | Subgrid | `grid-template-columns: subgrid` falls back. | Taffy support upstream. |
 | Long documents are slower than the others. A 1000-row, 24-page invoice takes about 1 s. | Batch throughput on very long tables. | Profile pagination. Hand the DOM to fulgur directly instead of serializing and re-parsing it. |
 | fulgur GCPM snapshot shifts after the port | 3 byte-level snapshots break pages one paragraph earlier or later than before | Find the line-height or metrics change in Parley 0.13. Accept new snapshots only once it is understood. |
-| Builds need sibling checkouts of patched fulgur and Blitz | Not buildable from crates.io alone | Upstream pull requests (see [architecture.md](architecture.md#changes-to-upstream-projects)). |
+| Builds need sibling checkouts of patched fulgur and Blitz | Not buildable from crates.io alone | Four of the five Blitz pull requests are merged; the serializer fix (DioxusLabs/blitz#1665) and the fulgur port (fulgur-rs/fulgur#969) are open. See [architecture.md](architecture.md#changes-to-upstream-projects). |
 
 ## Roadmap
 
@@ -42,10 +42,16 @@
      with a 256 MiB stack.
    - A `--allow` list for extra directories.
    - An optional, explicit network allow-list (off by default).
-2. **Upstreaming.** Blitz: public `LayoutPassState` and `svg_source`, the
-   serializer fix and the list-marker fix (DioxusLabs/blitz#1664, #1665,
-   #1666), and `ScriptDocument::runtime_limits_mut` (#1671). fulgur: the Blitz-master
-   port and its fixes (fulgur-rs/fulgur#969, draft).
+2. **Upstreaming.**
+   - ✅ Blitz, merged on 2026-11-19: public `LayoutPassState` and
+     `svg_source` (DioxusLabs/blitz#1664), the list-marker fix (#1666),
+     `ScriptDocument::runtime_limits_mut` (#1671) and the `@import` abort
+     fix (#1677).
+   - Blitz serializer fix (#1665): review comments addressed, awaiting
+     re-review. Once it merges, build against Blitz `main` instead of the
+     `public-layout-pass` branch.
+   - fulgur: the Blitz-master port and its fixes (fulgur-rs/fulgur#969,
+     draft).
 3. **Direct DOM hand-off.** Pass the post-JavaScript DOM to fulgur without
    serialization. This saves time and keeps CSSOM changes (`insertRule`,
    constructed stylesheets).

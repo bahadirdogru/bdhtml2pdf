@@ -85,26 +85,33 @@ zero, and all 2109 fulgur-blitz unit tests pass.
 
 ## Changes to upstream projects
 
-These changes currently live in sibling checkouts (`../fulgur` on branch
-`blitz-master`, `../blitz` on `public-layout-pass`). They are referenced from
-`Cargo.toml` through `path` and `[patch]` entries, and will be sent upstream as
-pull requests.
+These changes live in sibling checkouts (`../fulgur` on branch
+`blitz-master`, `../blitz` on `public-layout-pass`), referenced from
+`Cargo.toml` through `path` and `[patch]` entries, until they are merged
+upstream. Status as of 2026-11-19.
 
-| Project | Change | Why |
-|---|---|---|
-| Blitz | `LayoutPassState` public | fulgur relays out fixed and paginated boxes with Blitz's Taffy tree. |
-| Blitz | `Node::svg_source` public | fulgur re-parses inline SVG with the usvg version Krilla uses. |
-| Blitz | `ScriptDocument::runtime_limits_mut` | Lets the embedder set Boa's loop-iteration limit, so `while (true) {}` ends instead of hanging. |
-| Blitz | Serializer: HTML elements are never written as `<x />` | `<i></i>` was serialized as `<i />`, which HTML parses as an *open* `<i>`. After a JavaScript round trip, the rest of the page became italic or was swallowed. A regression test is added. |
-| fulgur | Port to Blitz master / Stylo 0.24 / Parley 0.13 / Taffy git | New network-handler model, layout data only on element nodes, Stylo getter renames, Parley run indices, Taffy's new `LayoutOutput` fields. |
-| fulgur | Counter attributes in the null namespace, set through the DOM mutator | Blitz 0.3 matches attribute namespaces, so `counter()` / `counters()` in `::before` rendered empty. |
-| Blitz | Outside list markers keep `white-space: pre` (CSS Lists 3 UA style) | Parley 0.13 collapsed the trailing space of `"1. "`, so numbered markers touched the item text (`1.Author`). |
-| fulgur | A captioned table's percentage width moves to the caption wrapper | The `fit-content` caption wrapper made `width:100%` tables shrink to their content width under Blitz 0.3. |
-| fulgur | Variable font coordinates passed to Krilla | Parley picks bold from a variable font (`NotoSans[wght]`) by setting `wght`; Krilla drew the default instance, so bold printed as regular. |
-| fulgur | `data:` images decoded and served | `<img src="data:…">` and `url(data:…)` were silently dropped. |
-| fulgur | `viewport_height` option | Image output lays out on a page as tall as the content; `vh` must still follow the viewport. |
-| fulgur | SVG generic font families follow fontconfig | usvg's defaults are fixed names (`Arial`, `Times New Roman`); where they are not installed, `<text font-family="sans-serif">` in inline SVG (charts) was dropped. |
-| Blitz | An `@import` whose URL does not parse is refused | `@import url("http://[::1")` aborted the process (`unwrap()` on `None`). |
+| Project | Change | Why | Upstream |
+|---|---|---|---|
+| Blitz | `LayoutPassState` public | fulgur relays out fixed and paginated boxes with Blitz's Taffy tree. | DioxusLabs/blitz#1664, merged |
+| Blitz | `Node::svg_source` public | fulgur re-parses inline SVG with the usvg version Krilla uses. | DioxusLabs/blitz#1664, merged |
+| Blitz | `ScriptDocument::runtime_limits_mut` | Lets the embedder set Boa's loop-iteration limit, so `while (true) {}` ends instead of hanging. | DioxusLabs/blitz#1671, merged |
+| Blitz | Serializer: HTML elements are never written as `<x />` | `<i></i>` was serialized as `<i />`, which HTML parses as an *open* `<i>`. After a JavaScript round trip, the rest of the page became italic or was swallowed. A regression test is added. | DioxusLabs/blitz#1665, in review |
+| Blitz | Outside list markers keep `white-space: pre` (CSS Lists 3 UA style) | Parley 0.13 collapsed the trailing space of `"1. "`, so numbered markers touched the item text (`1.Author`). | DioxusLabs/blitz#1666, merged |
+| Blitz | An `@import` whose URL does not parse is refused | `@import url("http://[::1")` aborted the process (`unwrap()` on `None`). | DioxusLabs/blitz#1677, merged |
+| fulgur | Port to Blitz master / Stylo 0.24 / Parley 0.13 / Taffy git | New network-handler model, layout data only on element nodes, Stylo getter renames, Parley run indices, Taffy's new `LayoutOutput` fields. | fulgur-rs/fulgur#969, draft |
+| fulgur | Counter attributes in the null namespace, set through the DOM mutator | Blitz 0.3 matches attribute namespaces, so `counter()` / `counters()` in `::before` rendered empty. | #969 |
+| fulgur | A captioned table's percentage width moves to the caption wrapper | The `fit-content` caption wrapper made `width:100%` tables shrink to their content width under Blitz 0.3. | #969 |
+| fulgur | Variable font coordinates passed to Krilla | Parley picks bold from a variable font (`NotoSans[wght]`) by setting `wght`; Krilla drew the default instance, so bold printed as regular. | #969 |
+| fulgur | `data:` images decoded and served | `<img src="data:…">` and `url(data:…)` were silently dropped. | #969 |
+| fulgur | `viewport_height` option | Image output lays out on a page as tall as the content; `vh` must still follow the viewport. | #969 |
+| fulgur | SVG generic font families follow fontconfig | usvg's defaults are fixed names (`Arial`, `Times New Roman`); where they are not installed, `<text font-family="sans-serif">` in inline SVG (charts) was dropped. | #969 |
+| fulgur | Multi-column flow: wrappers, margins, balancing | Content in a wrapper stayed in the first column, and margins between children were dropped. | #969 |
+| fulgur | `column-rule` colors resolved with Stylo | `var()`, `currentcolor`, `oklch()` and `color-mix()` dropped the rule. | #969 |
+| fulgur | Bordered boxes break across columns, painted in slices | A box with a border, padding or background overflowed its column. | #969 |
+| fulgur | Columns continue on the next page | A multi-column block taller than the page lost everything after its first page. | #969 |
+| fulgur | Bare text between blocks in columns | Text mixed with blocks inside a multi-column container panicked. | #969 |
+| fulgur | Floats flow through columns | A float kept its whole wrapper in one column, and text did not wrap around top-level floats. | #969 |
+| fulgur | Boxes inside paragraphs | Floats in a line of text were drawn at their placeholder, and inline blocks and floats in paragraphs split across pages were not drawn. | #969 |
 
 ## Resource policy
 

@@ -273,20 +273,22 @@ Found by our own test suites; details and plans are in
   1 s, but parsing time grows with the square of the depth: 80 000 levels take
   about 27 s. With JavaScript on, `--javascript-timeout` bounds it.
 - **Build:** depends on patched sibling checkouts of fulgur and Blitz until the
-  upstream pull requests are merged.
+  fulgur port (fulgur-rs/fulgur#969) and the last Blitz pull request
+  (DioxusLabs/blitz#1665) are merged.
 
 ## Building
 
 Requirements: Rust 1.92+ and the fontconfig development files
 (`fontconfig-devel` on Fedora, `libfontconfig1-dev` on Debian/Ubuntu).
 
-Until the upstream pull requests land, the build expects patched checkouts
-next to this repository:
+Until the remaining upstream pull requests land, the build expects patched
+checkouts next to this repository:
 
 ```
 ../fulgur   github.com/bahadirdogru/fulgur, branch blitz-master  (fulgur-rs/fulgur#969)
 ../blitz    github.com/bahadirdogru/blitz,  branch public-layout-pass
-            (DioxusLabs/blitz#1664, #1665, #1666, #1671, #1677)
+            (Blitz b4ad543 plus DioxusLabs/blitz#1664, #1666, #1671 and
+            #1677, merged upstream, and #1665, in review)
 ```
 
 ```sh
