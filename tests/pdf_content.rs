@@ -134,6 +134,42 @@ fn bold_text_gets_its_own_font_instance() {
     );
 }
 
+#[test]
+fn arial_uses_a_metric_compatible_font() {
+    // Without Arial installed, `font-family: Arial` fell through to the
+    // default font, so lines were wider and documents gained pages.
+    // fontconfig's metric aliases map it to Liberation Sans or Arimo, which
+    // have Arial's glyph widths; CI installs Liberation on Linux, and macOS
+    // and Windows have Arial itself.
+    let dir = tempdir("arial");
+    let input = dir.join("arial.html");
+    std::fs::write(
+        &input,
+        "<!DOCTYPE html><meta charset=utf-8>\
+         <p style='font-family:Arial'>regular <b>bold</b></p>",
+    )
+    .unwrap();
+    let out = dir.join("arial.pdf");
+    convert(&input, &out);
+    let pdf = std::fs::read(&out).unwrap();
+    let names: Vec<String> = pdf
+        .split(|&b| b == b'/')
+        .filter_map(|word| {
+            let word = word
+                .split(|b| b.is_ascii_whitespace() || *b == b'>')
+                .next()?;
+            let name = std::str::from_utf8(word).ok()?;
+            Some(name.split_once('+')?.1.to_string())
+        })
+        .collect();
+    assert!(
+        names.iter().any(|n| n.starts_with("LiberationSans")
+            || n.starts_with("Arimo")
+            || n.starts_with("Arial")),
+        "embedded fonts: {names:?}"
+    );
+}
+
 fn base64_encode(bytes: &[u8]) -> String {
     const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::new();

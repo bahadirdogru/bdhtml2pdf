@@ -1303,6 +1303,7 @@ dependencies = [
  "krilla-svg",
  "log",
  "lopdf",
+ "memmap2",
  "minijinja",
  "parley",
  "serde",

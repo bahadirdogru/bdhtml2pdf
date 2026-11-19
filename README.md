@@ -52,6 +52,11 @@ Download a binary from [Releases](https://github.com/bahadirdogru/bdhtml2pdf/rel
 (Linux x86_64 and aarch64, macOS on Apple silicon, Windows x86_64), or
 [build it](#building). On Linux it needs fontconfig (`libfontconfig1` /
 `fontconfig`), which desktop and most server installs already have.
+Pages written for Arial, Helvetica, Times New Roman, Courier New, Calibri or
+Cambria keep their line breaks when a metric-compatible family is installed
+(`fonts-liberation`, `fonts-crosextra-carlito`, `fonts-crosextra-caladea` on
+Debian and Ubuntu; `liberation-fonts`, `google-carlito-fonts`,
+`google-caladea-fonts` on Fedora), as with fontconfig's metric aliases.
 
 ```sh
 bdhtml2pdf invoice.html invoice.pdf
