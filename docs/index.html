@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>bdhtml2pdf: HTML and JavaScript to vector PDF, without a browser</title>
+<meta name="description" content="bdhtml2pdf is an open-source successor to wkhtmltopdf. It runs your page's JavaScript (React, Vue, Preact), styles it with Firefox's CSS engine and writes a vector PDF, PNG or JPEG in one small Rust process.">
+<link rel="canonical" href="https://bdhtml2pdf.bahadirdogru.com/">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1020" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/site.css">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="bdhtml2pdf">
+<meta property="og:title" content="bdhtml2pdf: HTML and JavaScript to vector PDF, without a browser">
+<meta property="og:description" content="A modern successor to wkhtmltopdf. Modern JavaScript and CSS, vector PDF, one small Rust process.">
+<meta property="og:url" content="https://bdhtml2pdf.bahadirdogru.com/">
+<meta property="og:image" content="https://bdhtml2pdf.bahadirdogru.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="bdhtml2pdf: HTML + JavaScript to vector PDF, with a rendered student report">
+<meta name="twitter:card" content="summary_large_image">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "bdhtml2pdf",
+  "description": "Converts HTML with JavaScript to vector PDF, PNG and JPEG without a browser. A modern successor to wkhtmltopdf.",
+  "url": "https://bdhtml2pdf.bahadirdogru.com/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux",
+  "softwareVersion": "0.1.0",
+  "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+  "codeRepository": "https://github.com/bahadirdogru/bdhtml2pdf",
+  "programmingLanguage": "Rust",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="./" aria-label="bdhtml2pdf home"><img src="favicon.svg" alt="" width="30" height="30">bdhtml2pdf</a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#samples">Samples</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#security">Security</a></li>
+        <li class="keep"><a href="#install">Install</a></li>
+        <li class="keep"><a class="gh" href="https://github.com/bahadirdogru/bdhtml2pdf">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Open source · Rust · GPL-3.0</p>
+      <h1 id="hero-title">HTML + JavaScript <span class="arrow">→</span> vector PDF, in one small process.</h1>
+      <p class="lede">A modern successor to wkhtmltopdf. bdhtml2pdf runs your page's JavaScript, styles it with Firefox's CSS engine and writes a PDF with real, searchable text. No Chromium, no WebKit, no Qt.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#install">Get started</a>
+        <a class="btn btn-ghost" href="https://github.com/bahadirdogru/bdhtml2pdf">
+          <svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+      <pre class="cmd"><code><span class="p">$ </span>bdhtml2pdf invoice.html invoice.pdf</code></pre>
+    </div>
+    <figure class="shot">
+      <a class="paper" href="showcase/showcase.pdf">
+        <picture>
+          <source type="image/webp" srcset="assets/showcase-800.webp 800w, assets/showcase-1400.webp 1400w" sizes="(max-width: 900px) 100vw, 560px">
+          <img src="assets/showcase-800.png" width="800" height="765" alt="A student report rendered by bdhtml2pdf: a gradient header, four KPI cards, a course table, an SVG bar chart of weekly study hours and three columns of Turkish text" fetchpriority="high">
+        </picture>
+      </a>
+      <figcaption>Rendered by bdhtml2pdf from <a href="showcase/showcase.html">one HTML file</a>. The cards, table and chart are built by JavaScript. <a href="showcase/showcase.pdf">Open the PDF</a> (36 KB, text selectable).</figcaption>
+    </figure>
+  </div>
+  <div class="wrap notice">
+    <p><strong>Pre-release 0.1.0.</strong> It works end to end and every number on this page is measured, but it still builds against patched checkouts of fulgur and Blitz until our upstream pull requests are merged. See the <a href="#status">known issues</a>.</p>
+  </div>
+</section>
+
+<section class="block" id="features" aria-labelledby="features-title">
+  <div class="wrap">
+    <p class="kicker">Features</p>
+    <h2 id="features-title">The modern web, printed</h2>
+    <p class="intro">Templates for invoices, reports, certificates and tickets are HTML, and more and more of that HTML is built by JavaScript. bdhtml2pdf renders it as it is.</p>
+    <div class="grid grid-3">
+      <article class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13.5 6l-3 12"/></svg></div>
+        <h3>Modern JavaScript</h3>
+        <p>ES2022+ through the Boa engine. React 18, Vue 3 and Preact apps render, timers included, on a virtual clock that never waits for real time.</p>
+      </article>
+      <article class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 12h7M4 19h16M14 9h6v6h-6z"/></svg></div>
+        <h3>Firefox's CSS engine</h3>
+        <p>Stylo, the cascade Firefox ships, not a hand-written subset: nesting, <code>:has()</code>, <code>@layer</code>, grid, flex, multi-column, <code>oklch()</code>, <code>color-mix()</code>.</p>
+      </article>
+      <article class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h4"/></svg></div>
+        <h3>Real PDF</h3>
+        <p>Text stays text, so it can be searched and copied. Fonts are subset. <code>@page</code>, margin boxes, running headers, page counters and repeated table headers work.</p>
+      </article>
+      <article class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 100 18 9 9 0 000-18z"/><path d="M12 7v5l3 2"/></svg></div>
+        <h3>Small and fast</h3>
+        <p>One 31 MB binary and one process. About 30–50 MB of memory and 0.07 s for a typical page; a React app with timers takes 0.16 s.</p>
+      </article>
+      <article class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Safe by default</h3>
+        <p>No network access. Files load only from the input's directory. Endless loops, timer floods and memory bombs are stopped by built-in limits.</p>
+      </article>
+      <article class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg></div>
+        <h3>Images too</h3>
+        <p>PNG and JPEG with <code>--width</code>, <code>--height</code>, <code>--zoom</code> and <code>--quality</code>, like wkhtmltoimage. They come from the same layout as the PDF.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="samples" aria-labelledby="samples-title">
+  <div class="wrap">
+    <p class="kicker">Samples</p>
+    <h2 id="samples-title">Rendered by bdhtml2pdf</h2>
+    <p class="intro">Every document below was produced by bdhtml2pdf from a single HTML file; the previews show the first page of each PDF. Open a PDF and select its text, or read the HTML source.</p>
+    <div class="samples">
+      <article class="sample">
+        <a class="thumb" href="showcase/showcase.pdf" aria-label="Report PDF">
+          <picture>
+            <source type="image/webp" srcset="assets/sample-report.webp">
+            <img src="assets/sample-report.png" width="600" height="780" alt="First page of the report sample" loading="lazy">
+          </picture>
+        </a>
+        <div class="body">
+          <h3>Report</h3>
+          <p>KPI cards, a table and an SVG chart, all built by JavaScript. Grid layout, <code>color-mix()</code>, three columns of text.</p>
+          <div class="links"><a href="showcase/showcase.pdf">PDF <span class="meta">36 KB</span></a><a href="showcase/showcase.html">HTML source</a></div>
+        </div>
+      </article>
+      <article class="sample">
+        <a class="thumb" href="samples/invoice.pdf" aria-label="Invoice PDF">
+          <picture>
+            <source type="image/webp" srcset="assets/sample-invoice.webp">
+            <img src="assets/sample-invoice.png" width="600" height="780" alt="First page of the invoice sample" loading="lazy">
+          </picture>
+        </a>
+        <div class="body">
+          <h3>Invoice</h3>
+          <p>Line items and VAT computed by a script, Turkish lira formatting, and a footer with “Page 1 of 1” from <code>@page</code> margin boxes.</p>
+          <div class="links"><a href="samples/invoice.pdf">PDF <span class="meta">23 KB</span></a><a href="samples/invoice.html">HTML source</a></div>
+        </div>
+      </article>
+      <article class="sample">
+        <a class="thumb" href="samples/newsletter.pdf" aria-label="Newsletter PDF">
+          <picture>
+            <source type="image/webp" srcset="assets/sample-newsletter.webp">
+            <img src="assets/sample-newsletter.png" width="600" height="780" alt="First page of the newsletter sample" loading="lazy">
+          </picture>
+        </a>
+        <div class="body">
+          <h3>Newsletter</h3>
+          <p>Three columns that flow around floated figures, a headline spanning the columns, and columns that continue on page two.</p>
+          <div class="links"><a href="samples/newsletter.pdf">PDF <span class="meta">49 KB</span></a><a href="samples/newsletter.html">HTML source</a></div>
+        </div>
+      </article>
+      <article class="sample">
+        <a class="thumb landscape" href="samples/certificate.pdf" aria-label="Certificate PDF">
+          <picture>
+            <source type="image/webp" srcset="assets/sample-certificate.webp">
+            <img src="assets/sample-certificate.png" width="600" height="424" alt="The certificate sample, in landscape" loading="lazy">
+          </picture>
+        </a>
+        <div class="body">
+          <h3>Certificate</h3>
+          <p>Landscape A4 in Turkish, an SVG seal with text on a path, and <code>text-transform</code> under <code>lang="tr"</code>: <i>ılgın</i> → <i>Ilgın</i>.</p>
+          <div class="links"><a href="samples/certificate.pdf">PDF <span class="meta">40 KB</span></a><a href="samples/certificate.html">HTML source</a></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="how" aria-labelledby="how-title">
+  <div class="wrap">
+    <p class="kicker">How it works</p>
+    <h2 id="how-title">Maintained Rust libraries, glued together</h2>
+    <p class="intro">Every hard part already existed as a maintained Rust library. bdhtml2pdf connects them into one pipeline with one DOM and one style engine, and sends every change it needs upstream as a pull request.</p>
+    <ol class="pipeline">
+      <li><b>Parse</b><span>html5ever builds the DOM, as browsers do</span></li>
+      <li><b>Run scripts</b><span>Boa runs JavaScript against Blitz's DOM; timers drain on a virtual clock</span></li>
+      <li><b>Style and lay out</b><span>Stylo for CSS, Taffy for flex and grid, Parley for text</span></li>
+      <li><b>Paginate</b><span>fulgur: <code>@page</code>, margin boxes, counters, table and column breaks</span></li>
+      <li><b>Write</b><span>Krilla writes the vector PDF; hayro rasterizes it for PNG and JPEG</span></li>
+    </ol>
+    <div class="table-wrap components">
+      <table>
+        <caption>Components</caption>
+        <thead><tr><th scope="col">Library</th><th scope="col">Role</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><a href="https://github.com/DioxusLabs/blitz">Blitz</a></th><td>DOM, style and layout glue, and the JavaScript binding</td></tr>
+          <tr><th scope="row"><a href="https://github.com/servo/stylo">Stylo</a></th><td>CSS cascade, the engine Firefox uses</td></tr>
+          <tr><th scope="row"><a href="https://github.com/DioxusLabs/taffy">Taffy</a> · <a href="https://github.com/linebender/parley">Parley</a></th><td>block, flex and grid layout · text shaping and line breaking</td></tr>
+          <tr><th scope="row"><a href="https://github.com/boa-dev/boa">Boa</a></th><td>JavaScript engine, written in Rust</td></tr>
+          <tr><th scope="row"><a href="https://github.com/fulgur-rs/fulgur">fulgur</a></th><td>paged media and pagination; ported by us to current Blitz</td></tr>
+          <tr><th scope="row"><a href="https://github.com/LaurenzV/krilla">Krilla</a> · <a href="https://github.com/LaurenzV/hayro">hayro</a></th><td>PDF writer · PDF rasterizer for image output</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="results" aria-labelledby="results-title">
+  <div class="wrap">
+    <p class="kicker">Results</p>
+    <h2 id="results-title">Measured, not claimed</h2>
+    <p class="intro">The same pages went through four engines with default settings on one machine (i7-12800H, Fedora 45, median of 5 runs, 19 November 2026). Results are read back from the PDFs; nothing is judged by eye.</p>
+    <div class="charts">
+      <figure class="chart">
+        <figcaption><b>Memory for a one-page document</b><span>Largest process, MB. Lower is better.</span></figcaption>
+        <ul class="bars">
+          <li class="us"><span class="name">bdhtml2pdf</span><span class="track"><span class="bar w31"></span></span><span class="val">31 MB</span></li>
+          <li><span class="name">sghtmltopdf</span><span class="track"><span class="bar w10"></span></span><span class="val">10 MB</span></li>
+          <li><span class="name">wkhtmltopdf</span><span class="track"><span class="bar w35"></span></span><span class="val">35 MB</span></li>
+          <li><span class="name">Chromium</span><span class="track"><span class="bar w250"></span></span><span class="val">250 MB</span></li>
+        </ul>
+      </figure>
+      <figure class="chart">
+        <figcaption><b>Install size</b><span>MB on disk. Lower is better.</span></figcaption>
+        <ul class="bars">
+          <li class="us"><span class="name">bdhtml2pdf</span><span class="track"><span class="bar s31"></span></span><span class="val">31.5 MB</span></li>
+          <li><span class="name">sghtmltopdf</span><span class="track"><span class="bar s13"></span></span><span class="val">13 MB</span></li>
+          <li><span class="name">wkhtmltopdf</span><span class="track"><span class="bar s39"></span></span><span class="val">39 MB</span></li>
+          <li><span class="name">Chromium</span><span class="track"><span class="bar s432"></span></span><span class="val">432 MB</span></li>
+        </ul>
+      </figure>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <caption>Correctness and speed</caption>
+        <thead>
+          <tr><th scope="col">Check</th><th scope="col">bdhtml2pdf 0.1.0</th><th scope="col">sghtmltopdf 0.8.0</th><th scope="col">wkhtmltopdf 0.12.6</th><th scope="col">Chromium 157</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Modern CSS (11)</th><td class="us">10</td><td>8</td><td>1</td><td>11</td></tr>
+          <tr><th scope="row">Modern JavaScript (19)</th><td class="us">18</td><td>0, no JS</td><td>0, no ES2015+</td><td>18–19</td></tr>
+          <tr><th scope="row">React, Vue, Preact apps</th><td class="us">3/3</td><td>0/3</td><td>0/3</td><td>3/3</td></tr>
+          <tr><th scope="row">HTML parsing (7)</th><td class="us">7</td><td>7</td><td>6</td><td>7</td></tr>
+          <tr><th scope="row">Turkish (15)</th><td class="us">12</td><td>8</td><td>8</td><td>14</td></tr>
+          <tr><th scope="row">Fonts (8)</th><td class="us">7</td><td>7</td><td>6</td><td>8</td></tr>
+          <tr><th scope="row">One-page document</th><td class="us">0.07 s</td><td>0.02 s</td><td>0.24 s</td><td>0.36 s</td></tr>
+          <tr><th scope="row">React app with timers</th><td class="us">0.16 s</td><td>—</td><td>—</td><td>0.38 s</td></tr>
+          <tr><th scope="row">24-page invoice</th><td class="us">1.07 s</td><td>0.08 s</td><td>0.37 s</td><td>0.71 s</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">bdhtml2pdf is the only engine besides Chromium that runs modern JavaScript apps and modern CSS, with about an eighth of its memory. It is slower than the JavaScript-free sghtmltopdf on static pages and slower than all of them on very long tables. The install size was 25 MB in the benchmark run and is 31.5 MB since image output was added. <a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/benchmarks/2026-11-19.md">Full results and method</a>.</p>
+  </div>
+</section>
+
+<section class="block" id="security" aria-labelledby="security-title">
+  <div class="wrap">
+    <p class="kicker">Security</p>
+    <h2 id="security-title">Safe defaults, tested against attacks</h2>
+    <p class="intro">HTML-to-PDF services often render documents that users control. The security suite tries to read local files, escape the input directory, reach internal services and exhaust the machine, with every engine on its default settings.</p>
+    <div class="grid grid-2">
+      <article class="card">
+        <div class="score"><b>11/11</b><span>file reads and SSRF blocked</span></div>
+        <ul class="checks">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>No <code>/etc/passwd</code> through iframes, objects, redirects or <code>fetch()</code></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>No escape from the input directory, including through symlinks</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>No requests to 127.0.0.1 from HTML, CSS, SVG or JavaScript</li>
+        </ul>
+        <p class="note">wkhtmltopdf 9/11 · headless Chromium 1/11</p>
+      </article>
+      <article class="card">
+        <div class="score"><b>5/5</b><span>denial-of-service cases stopped</span></div>
+        <ul class="checks">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><code>while (true) {}</code> ends after a loop limit</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Timer floods and memory bombs hit bounded limits</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Billion laughs and 20 000 nested elements finish</li>
+        </ul>
+        <p class="note">wkhtmltopdf 3/5 · headless Chromium 3/5</p>
+      </article>
+    </div>
+    <p class="note"><a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/security.md">Threat model, defaults and every case</a>.</p>
+  </div>
+</section>
+
+<section class="block" id="turkish" aria-labelledby="turkish-title">
+  <div class="wrap">
+    <p class="kicker">Languages</p>
+    <h2 id="turkish-title">Turkish is a first-class requirement</h2>
+    <div class="tr">
+      <div>
+        <p class="intro">The whole alphabet is tested in system fonts, web fonts, bold and italic, and it survives text extraction from the PDF. Case mapping follows the language of the text, the kind of detail engines get wrong.</p>
+        <p class="alphabet" lang="tr">Ç ç Ğ ğ I ı İ i Ö ö Ş ş Ü ü</p>
+      </div>
+      <pre class="demo"><code><span class="c">/* lang="tr" */</span>
+<span class="k">text-transform</span>: uppercase;
+  istanbul → <span class="r">İSTANBUL</span>
+<span class="k">text-transform</span>: capitalize;
+  izmir    → <span class="r">İzmir</span>
+<span class="k">text-transform</span>: lowercase;
+  IŞIK     → <span class="r">ışık</span></code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="install" aria-labelledby="install-title">
+  <div class="wrap">
+    <p class="kicker">Install</p>
+    <h2 id="install-title">Build it and convert a page</h2>
+    <p class="intro">bdhtml2pdf builds from source with Rust 1.92 or newer and the fontconfig development files (<code>fontconfig-devel</code> on Fedora, <code>libfontconfig1-dev</code> on Debian and Ubuntu).</p>
+    <ol class="steps">
+      <li>
+        <div>
+          <h3>Check out the sources</h3>
+          <p>Until the upstream pull requests are merged, the build expects patched fulgur and Blitz next to it.</p>
+<pre class="code"><code>git clone https://github.com/bahadirdogru/bdhtml2pdf
+git clone -b blitz-master https://github.com/bahadirdogru/fulgur
+git clone -b public-layout-pass https://github.com/bahadirdogru/blitz</code></pre>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Build</h3>
+<pre class="code"><code>cd bdhtml2pdf
+cargo build --release      <span class="c"># target/release/bdhtml2pdf</span></code></pre>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Convert</h3>
+          <p>The options follow wkhtmltopdf. The output extension picks the format: <code>.pdf</code>, <code>.png</code>, <code>.jpg</code>, or <code>.html</code> for the DOM after JavaScript ran.</p>
+<pre class="code"><code>bdhtml2pdf --page-size A4 --orientation Landscape \
+  --margin-top 15mm report.html report.pdf
+
+<span class="c"># wait until the page sets window.status = "ready"</span>
+bdhtml2pdf --window-status ready --javascript-delay 2000 \
+  dashboard.html dashboard.pdf
+
+<span class="c"># a 1280 px wide image of the whole page, at twice the pixels</span>
+bdhtml2pdf --width 1280 --zoom 2 page.html page.png</code></pre>
+          <p><a href="https://github.com/bahadirdogru/bdhtml2pdf#command-line">All command-line options</a></p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="block" id="status" aria-labelledby="status-title">
+  <div class="wrap">
+    <p class="kicker">Status</p>
+    <h2 id="status-title">Known issues</h2>
+    <p class="intro">Found by our own test suites. Details and plans are in the <a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/roadmap.md">roadmap</a>.</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Not there yet</h3>
+        <ul class="issues">
+          <li>Container queries, subgrid and Canvas 2D (SVG charts work)</li>
+          <li>No <code>Intl</code> in JavaScript; Turkish case mapping in CSS works</li>
+          <li>wkhtmltopdf's header and footer flags</li>
+          <li>Ligature letters drop out of extracted text: <i>office</i> → <i>ofce</i></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Next</h3>
+        <ul class="issues">
+          <li>Upstream the Blitz and fulgur changes, then publish releases</li>
+          <li>Faster pagination for long tables</li>
+          <li>A server mode and bindings for Ruby, Python, PHP and Node</li>
+          <li>PDF/A for archiving and Canvas 2D charts</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>bdhtml2pdf is free software under the <a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/LICENSE">GPL-3.0-or-later</a>.<br>This page has no scripts, cookies or trackers.</p>
+    <ul>
+      <li><a href="https://github.com/bahadirdogru/bdhtml2pdf">GitHub</a></li>
+      <li><a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/why.md">Why</a></li>
+      <li><a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/architecture.md">Architecture</a></li>
+      <li><a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/roadmap.md">Roadmap</a></li>
+      <li><a href="https://github.com/bahadirdogru/bdhtml2pdf/issues">Issues</a></li>
+    </ul>
+  </div>
+</footer>
+</body>
+</html>

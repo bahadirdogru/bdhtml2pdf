@@ -10,7 +10,7 @@ A modern successor to wkhtmltopdf. No Chromium, no WebKit, no Qt.
 [![Status: pre-release](https://img.shields.io/badge/status-pre--release%200.1.0-yellow)](#known-issues)
 [![Security suite: 16/16](https://img.shields.io/badge/security%20suite-16%2F16-brightgreen)](docs/security.md)
 
-[Quick start](#quick-start) · [How it works](#how-it-works) · [Results](#results) · [Command line](#command-line) · [Docs](#documentation)
+[Website](https://bdhtml2pdf.bahadirdogru.com) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Results](#results) · [Command line](#command-line) · [Docs](#documentation)
 
 <br>
 
@@ -255,9 +255,15 @@ Found by our own test suites; details and plans are in
 [docs/roadmap.md](docs/roadmap.md#known-issues).
 
 - **Multi-column layout has gaps.** Text, wrappers and bordered boxes flow
-  across columns and pages. Bare text mixed with blocks inside the columns
-  does not break between lines, and floats inside the columns turn off
-  splitting for that column set.
+  across columns and pages, and floats move with the text beside them. Bare
+  text mixed with blocks inside the columns does not break between lines,
+  and a positioned child turns splitting off for its column set.
+- **A float inside a line of text is drawn in the wrong place** (or not at
+  all): `<p><span style="float:left">…</span>text</p>`. The text makes room
+  for it. Block-level floats are fine.
+- **`oklch()` and other modern colors in SVG attributes draw black**
+  (`<rect fill="oklch(…)">`). Use hex or `rgb()` there; CSS colors in HTML
+  are fine.
 - **Ligature text.** Words with fi/fl/ffl ligatures lose those letters in
   extracted text: `office` → `ofce`.
 - **No `Intl` in JavaScript.** `toLocaleUpperCase('tr-TR')`,
@@ -321,6 +327,7 @@ bench/security.sh
 | [benchmarks/](docs/benchmarks/README.md) | method, release procedure, results per release |
 | [roadmap.md](docs/roadmap.md) | goals, status, known issues, roadmap |
 | [research.md](docs/research.md) | original research notes: candidates, the Stylo blocker, early measurements |
+| [index.html](docs/index.html) | the website, served by GitHub Pages from `docs/`; [samples](docs/samples) and pictures are rebuilt by `scripts/site.sh` |
 
 ## License
 

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Invoice INV-2026-0418</title>
+<!--
+  A sample for https://bdhtml2pdf.bahadirdogru.com. The line items, totals and
+  VAT are computed by the script at the end. Regenerate with site/build.sh.
+  All names and figures are invented.
+-->
+<style>
+  :root {
+    --ink: oklch(24% 0.02 250);
+    --muted: oklch(50% 0.02 250);
+    --accent: oklch(52% 0.15 175);
+    --line: oklch(90% 0.01 250);
+    --soft: oklch(97% 0.01 175);
+  }
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm;
+    @bottom-left { content: "Northwind Studio · Invoice INV-2026-0418"; font: 8pt sans-serif; color: #8a8f99; }
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt sans-serif; color: #8a8f99; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 10pt/1.45 "Noto Sans", sans-serif; color: var(--ink); }
+  header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .brand { display: flex; gap: 10px; align-items: center; }
+  .brand svg { width: 38px; height: 38px; }
+  .brand b { font-size: 15pt; letter-spacing: -.01em; display: block; }
+  .brand span { color: var(--muted); font-size: 8.5pt; }
+  .doc { text-align: right; }
+  .doc h1 { margin: 0; font-size: 22pt; letter-spacing: .04em; color: var(--accent); }
+  .doc p { margin: 2px 0 0; color: var(--muted); }
+  .parties { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin: 26px 0 22px; padding: 14px 16px; background: var(--soft); border-radius: 8px; }
+  .parties h2 { margin: 0 0 4px; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .parties p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1.5px solid var(--ink); padding: 6px 6px; }
+  td { padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td small { display: block; color: var(--muted); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr { break-inside: avoid; }
+  .summary { display: flex; justify-content: space-between; gap: 24px; margin-top: 18px; break-inside: avoid; }
+  .note { flex: 1; color: var(--muted); font-size: 8.5pt; }
+  .note b { color: var(--ink); }
+  .totals { width: 44%; }
+  .totals div { display: flex; justify-content: space-between; padding: 4px 6px; }
+  .totals .grand { margin-top: 4px; padding: 9px 10px; border-radius: 6px; background: var(--accent); color: white; font-weight: 700; font-size: 12pt; }
+  .pay { margin-top: 26px; display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; padding-top: 14px; border-top: 1px solid var(--line); break-inside: avoid; }
+  .pay h2 { margin: 0 0 4px; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .pay p { margin: 0; }
+  .stamp { padding: 6px 12px; border: 2px solid var(--accent); color: var(--accent); border-radius: 6px; font-weight: 700; letter-spacing: .1em; transform: rotate(-4deg); }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#008364"/><path d="M11 28V12l18 16V12" fill="none" stroke="white" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><b>Northwind Studio</b><span>Design &amp; engineering · İzmir</span></div>
+  </div>
+  <div class="doc">
+    <h1>INVOICE</h1>
+    <p>No. INV-2026-0418</p>
+    <p>Issued 19 November 2026 · Due 19 December 2026</p>
+  </div>
+</header>
+
+<section class="parties">
+  <div><h2>Billed to</h2><p><b>Çağlayan Lojistik A.Ş.</b><br>Gümüşsuyu Cd. 14<br>34437 Beyoğlu, İstanbul</p></div>
+  <div><h2>From</h2><p><b>Northwind Studio Ltd.</b><br>Kordon Boyu 3<br>35210 Konak, İzmir</p></div>
+  <div><h2>Project</h2><p>Customer portal redesign<br>PO 7781-B<br>Net 30 days</p></div>
+</section>
+
+<table>
+  <thead><tr><th>Description</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Amount</th></tr></thead>
+  <tbody id="items"></tbody>
+</table>
+
+<div class="summary">
+  <p class="note"><b>Thank you.</b> This invoice was generated from HTML: the rows, subtotal and VAT were computed by JavaScript before the PDF was written. The page footer comes from CSS <code>@page</code> margin boxes.</p>
+  <div class="totals">
+    <div><span>Subtotal</span><span class="num" id="subtotal"></span></div>
+    <div><span>VAT 20%</span><span class="num" id="vat"></span></div>
+    <div class="grand"><span>Total due</span><span class="num" id="total"></span></div>
+  </div>
+</div>
+
+<section class="pay">
+  <div>
+    <h2>Payment</h2>
+    <p>IBAN TR00 0000 0000 0000 0000 0000 00 · Reference INV-2026-0418</p>
+  </div>
+  <div class="stamp">ISSUED</div>
+</section>
+
+<script>
+  const items = [
+    ["Discovery workshop", "Two days on site, stakeholder interviews", 2, 1450],
+    ["UX research", "Usability tests with 8 participants", 1, 3200],
+    ["Interface design", "Design system, 24 screens, prototypes", 1, 7800],
+    ["Front-end development", "React components, accessibility review", 64, 95],
+    ["PDF export service", "Invoices and statements with bdhtml2pdf", 12, 95],
+    ["Hosting setup", "CI pipeline and staging environment", 1, 650],
+  ];
+  const money = (v) => "₺" + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  let subtotal = 0;
+  const tbody = document.getElementById("items");
+  for (const [name, detail, qty, price] of items) {
+    const amount = qty * price;
+    subtotal += amount;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${name}<small>${detail}</small></td><td class="num">${qty}</td>` +
+      `<td class="num">${money(price)}</td><td class="num">${money(amount)}</td>`;
+    tbody.append(tr);
+  }
+  const vat = subtotal * 0.2;
+  document.getElementById("subtotal").textContent = money(subtotal);
+  document.getElementById("vat").textContent = money(vat);
+  document.getElementById("total").textContent = money(subtotal + vat);
+</script>
+</body>
+</html>
