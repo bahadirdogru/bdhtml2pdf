@@ -219,7 +219,7 @@ td.us { background: color-mix(in srgb, var(--accent-soft) 60%, transparent); fon
 pre.code { margin: 0; padding: 18px 20px; border-radius: 12px; background: var(--code-bg); color: var(--code-ink); overflow-x: auto; font-size: 14.5px; line-height: 1.65; }
 pre.code .c { color: #7e86b3; }
 .steps { counter-reset: s; margin: 36px 0 0; padding: 0; list-style: none; display: grid; gap: 22px; }
-.steps > li { display: grid; grid-template-columns: 40px 1fr; gap: 16px; }
+.steps > li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; }
 .steps > li::before { counter-increment: s; content: counter(s); display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); font-weight: 750; }
 .steps h3 { margin: 6px 0 10px; }
 .steps p { margin: 0 0 12px; color: var(--ink-2); }
@@ -245,3 +245,4 @@ pre.code .c { color: #7e86b3; }
   body { font-size: 11pt; }
   section.block { padding-top: 24pt; }
 }
+.note code, .steps p code { overflow-wrap: anywhere; }

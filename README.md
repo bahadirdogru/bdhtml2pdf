@@ -48,15 +48,72 @@ one process of about 31 MB, written in Rust.
 
 ## Quick start
 
-Download a binary from [Releases](https://github.com/bahadirdogru/bdhtml2pdf/releases)
-(Linux x86_64 and aarch64, macOS on Apple silicon, Windows x86_64), or
-[build it](#building). On Linux it needs fontconfig (`libfontconfig1` /
-`fontconfig`), which desktop and most server installs already have.
-Pages written for Arial, Helvetica, Times New Roman, Courier New, Calibri or
-Cambria keep their line breaks when a metric-compatible family is installed
-(`fonts-liberation`, `fonts-crosextra-carlito`, `fonts-crosextra-caladea` on
-Debian and Ubuntu; `liberation-fonts`, `google-carlito-fonts`,
-`google-caladea-fonts` on Fedora), as with fontconfig's metric aliases.
+### Install
+
+Prebuilt binaries are on the
+[Releases](https://github.com/bahadirdogru/bdhtml2pdf/releases) page: one
+archive per platform, each a single executable with no runtime to install,
+plus a `.sha256` file. To build from source instead, see
+[Building](#building).
+
+| Platform | Archive |
+|---|---|
+| Linux x86_64 (glibc 2.35+: Ubuntu 22.04, Debian 12, RHEL 9 or newer) | `bdhtml2pdf-<version>-x86_64-unknown-linux-gnu.tar.gz` |
+| Linux aarch64 | `bdhtml2pdf-<version>-aarch64-unknown-linux-gnu.tar.gz` |
+| macOS, Apple silicon | `bdhtml2pdf-<version>-aarch64-apple-darwin.tar.gz` |
+| Windows x86_64 | `bdhtml2pdf-<version>-x86_64-pc-windows-msvc.zip` |
+
+**Linux** (use `aarch64-unknown-linux-gnu` on ARM):
+
+```sh
+VERSION=0.1.0
+TARGET=x86_64-unknown-linux-gnu
+NAME=bdhtml2pdf-$VERSION-$TARGET
+curl -LO https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$VERSION/$NAME.tar.gz
+curl -LO https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$VERSION/$NAME.tar.gz.sha256
+sha256sum -c $NAME.tar.gz.sha256
+tar xzf $NAME.tar.gz
+sudo install $NAME/bdhtml2pdf /usr/local/bin/   # or keep it anywhere on PATH
+bdhtml2pdf --version
+```
+
+It needs fontconfig (`libfontconfig1` on Debian and Ubuntu, `fontconfig` on
+Fedora and RHEL), which desktop and most server installs already have; in a
+slim container image, install it along with some fonts:
+
+```sh
+apt-get install -y libfontconfig1 fonts-dejavu-core fonts-liberation   # Debian, Ubuntu
+dnf install -y fontconfig dejavu-sans-fonts liberation-fonts            # Fedora, RHEL
+```
+
+**macOS**: the same steps with `TARGET=aarch64-apple-darwin` and
+`shasum -a 256 -c` in place of `sha256sum -c`. The binary is not signed, so
+a copy downloaded with a browser needs `xattr -d com.apple.quarantine
+bdhtml2pdf` once (`curl` downloads are not quarantined).
+
+**Windows** (PowerShell):
+
+```powershell
+$Version = "0.1.0"
+$Name = "bdhtml2pdf-$Version-x86_64-pc-windows-msvc"
+Invoke-WebRequest "https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$Version/$Name.zip" -OutFile "$Name.zip"
+(Get-FileHash "$Name.zip" -Algorithm SHA256).Hash   # compare with $Name.zip.sha256
+Expand-Archive "$Name.zip" -DestinationPath .
+.\$Name\bdhtml2pdf.exe --version
+```
+
+**Fonts.** Pages written for Arial, Helvetica, Times New Roman, Courier New,
+Calibri or Cambria keep their line breaks when a metric-compatible family is
+installed (`fonts-liberation`, `fonts-crosextra-carlito`,
+`fonts-crosextra-caladea` on Debian and Ubuntu; `liberation-fonts`,
+`google-carlito-fonts`, `google-caladea-fonts` on Fedora), as with
+fontconfig's metric aliases. Windows and macOS already have the originals.
+
+**Coming from wkhtmltopdf?** wkhtmltopdf prints everything at 80% by default
+("smart shrinking"). Pass `--enable-smart-shrinking` to get the same sizes and
+page breaks for templates tuned to it.
+
+### Use
 
 ```sh
 bdhtml2pdf invoice.html invoice.pdf

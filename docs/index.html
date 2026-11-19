@@ -324,22 +324,36 @@
 <section class="block" id="install" aria-labelledby="install-title">
   <div class="wrap">
     <p class="kicker">Install</p>
-    <h2 id="install-title">Build it and convert a page</h2>
-    <p class="intro">bdhtml2pdf builds from source with Rust 1.92 or newer and the fontconfig development files (<code>fontconfig-devel</code> on Fedora, <code>libfontconfig1-dev</code> on Debian and Ubuntu).</p>
+    <h2 id="install-title">Download it and convert a page</h2>
+    <p class="intro">Prebuilt binaries for Linux (x86_64 and aarch64, glibc 2.35 or newer: Ubuntu 22.04, Debian 12, RHEL 9 and later), macOS on Apple silicon and Windows x86_64 are on the <a href="https://github.com/bahadirdogru/bdhtml2pdf/releases">Releases</a> page. Each archive holds a single executable, with a <code>.sha256</code> file beside it.</p>
     <ol class="steps">
       <li>
         <div>
-          <h3>Check out the sources</h3>
-          <p>Until the upstream pull requests are merged, the build expects patched fulgur and Blitz next to it, at the commits CI builds.</p>
-<pre class="code"><code>git clone https://github.com/bahadirdogru/bdhtml2pdf
-cd bdhtml2pdf
-scripts/upstream.sh fetch  <span class="c"># ../fulgur and ../blitz</span></code></pre>
+          <h3>Download</h3>
+          <p>Linux, with <code>aarch64-unknown-linux-gnu</code> on ARM. On macOS use <code>aarch64-apple-darwin</code> and <code>shasum -a 256 -c</code>; the binary is not signed, so a copy downloaded with a browser needs <code>xattr -d com.apple.quarantine bdhtml2pdf</code> once.</p>
+<pre class="code"><code>VERSION=0.1.0
+TARGET=x86_64-unknown-linux-gnu
+NAME=bdhtml2pdf-$VERSION-$TARGET
+URL=https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$VERSION
+curl -LO $URL/$NAME.tar.gz
+curl -LO $URL/$NAME.tar.gz.sha256
+sha256sum -c $NAME.tar.gz.sha256
+tar xzf $NAME.tar.gz
+sudo install $NAME/bdhtml2pdf /usr/local/bin/</code></pre>
+          <p>Windows, in PowerShell:</p>
+<pre class="code"><code>$Version = "0.1.0"
+$Name = "bdhtml2pdf-$Version-x86_64-pc-windows-msvc"
+Invoke-WebRequest "https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$Version/$Name.zip" -OutFile "$Name.zip"
+(Get-FileHash "$Name.zip" -Algorithm SHA256).Hash  <span class="c"># compare with $Name.zip.sha256</span>
+Expand-Archive "$Name.zip" -DestinationPath .</code></pre>
         </div>
       </li>
       <li>
         <div>
-          <h3>Build</h3>
-<pre class="code"><code>cargo build --release      <span class="c"># target/release/bdhtml2pdf</span></code></pre>
+          <h3>Fonts on Linux</h3>
+          <p>bdhtml2pdf uses fontconfig, which desktop and most server installs already have. In a slim container, install it with some fonts. Liberation keeps the line breaks of pages written for Arial, Times New Roman and Courier New.</p>
+<pre class="code"><code>apt-get install -y libfontconfig1 fonts-dejavu-core fonts-liberation  <span class="c"># Debian, Ubuntu</span>
+dnf install -y fontconfig dejavu-sans-fonts liberation-fonts           <span class="c"># Fedora, RHEL</span></code></pre>
         </div>
       </li>
       <li>
@@ -355,10 +369,12 @@ bdhtml2pdf --window-status ready --javascript-delay 2000 \
 
 <span class="c"># a 1280 px wide image of the whole page, at twice the pixels</span>
 bdhtml2pdf --width 1280 --zoom 2 page.html page.png</code></pre>
+          <p>Coming from wkhtmltopdf? It prints everything at 80% by default; <code>--enable-smart-shrinking</code> gives templates tuned to it the same sizes and page breaks.</p>
           <p><a href="https://github.com/bahadirdogru/bdhtml2pdf#command-line">All command-line options</a></p>
         </div>
       </li>
     </ol>
+    <p class="note">To build from source instead: Rust 1.92 or newer and the fontconfig development files (<code>fontconfig-devel</code>, <code>libfontconfig1-dev</code>), then <code>git clone https://github.com/bahadirdogru/bdhtml2pdf &amp;&amp; cd bdhtml2pdf &amp;&amp; scripts/upstream.sh fetch &amp;&amp; cargo build --release</code>. Until the upstream pull requests are merged, <code>upstream.sh</code> checks out the patched fulgur and Blitz next to it. <a href="https://github.com/bahadirdogru/bdhtml2pdf#building">Building</a></p>
   </div>
 </section>
 
