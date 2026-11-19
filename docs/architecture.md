@@ -39,8 +39,9 @@ directly is on the [roadmap](roadmap.md).
 
 | File | Role |
 |---|---|
-| `src/main.rs` | wkhtmltopdf-compatible CLI: `input output`, `--page-size`, `--orientation`, `--page-width/height`, `--margin-*`, `--title`, `--disable-javascript`, `--javascript-delay`, `--window-status`, `--javascript-timeout`, `--debug-javascript`, `-q`. An output name ending in `.html` writes the post-JavaScript DOM instead of a PDF. |
-| `src/lifecycle.rs` | Render lifecycle on `ScriptDocument`: no timer thread, **virtual time**. A `setTimeout(fn, 5000)` costs no real waiting, and the result does not depend on machine speed. |
+| `src/main.rs` | wkhtmltopdf-compatible CLI: `input output`, `--page-size`, `--orientation`, `--page-width/height`, `--margin-*`, `--title`, `--disable-javascript`, `--javascript-delay`, `--window-status`, `--javascript-timeout`, `--javascript-loop-limit`, `--max-memory`, `--debug-javascript`, `-q`. An output name ending in `.html` writes the post-JavaScript DOM instead of a PDF. |
+| `src/lifecycle.rs` | Render lifecycle on `ScriptDocument`: no timer thread, **virtual time**. A `setTimeout(fn, 5000)` costs no real waiting, and the result does not depend on machine speed. Also sets the loop limit, clamps nested zero-delay timers as browsers do, and runs JavaScript on a worker thread under a wall-clock watchdog. |
+| `src/limits.rs` | Counting global allocator: ends the process with exit status 4 above `--max-memory`. |
 | `src/fetch.rs` | Script loader sandbox: `data:` URLs and `file:` URLs **inside the input directory** only. Paths are canonicalized first, so `..` and symlinks cannot escape. No network. |
 | `src/pdf.rs` | Calls fulgur with page size, margins, title and a base path that confines `<link>`, `<img>` and `@import` to the input directory. |
 | `src/page.rs` | Page sizes (A3–A5, B4, B5, Letter, Legal, Ledger) and length parsing (`mm`, `cm`, `in`, `pt`, `px`). |
@@ -89,6 +90,7 @@ pull requests.
 |---|---|---|
 | Blitz | `LayoutPassState` public | fulgur relays out fixed and paginated boxes with Blitz's Taffy tree. |
 | Blitz | `Node::svg_source` public | fulgur re-parses inline SVG with the usvg version Krilla uses. |
+| Blitz | `ScriptDocument::runtime_limits_mut` | Lets the embedder set Boa's loop-iteration limit, so `while (true) {}` ends instead of hanging. |
 | Blitz | Serializer: HTML elements are never written as `<x />` | `<i></i>` was serialized as `<i />`, which HTML parses as an *open* `<i>`. After a JavaScript round trip, the rest of the page became italic or was swallowed. A regression test is added. |
 | fulgur | Port to Blitz master / Stylo 0.24 / Parley 0.13 / Taffy git | New network-handler model, layout data only on element nodes, Stylo getter renames, Parley run indices, Taffy's new `LayoutOutput` fields. |
 | fulgur | Counter attributes in the null namespace, set through the DOM mutator | Blitz 0.3 matches attribute namespaces, so `counter()` / `counters()` in `::before` rendered empty. |
@@ -102,7 +104,8 @@ pull requests.
 | `<script src>`, `fetch()` | `data:` and files under the input directory; everything else is refused. |
 | `<link>`, `@import`, `<img>`, fonts | Files under the input directory (fulgur's `base_path`); remote URLs are not fetched. |
 | Network | None. There is no HTTP client in the binary. |
-| JavaScript time | Virtual-time budget (`--javascript-delay`, default 200 ms) plus a wall-clock limit (`--javascript-timeout`, default 30 s). |
+| JavaScript time | Virtual-time budget (`--javascript-delay`, default 200 ms), nested-timer clamping, 10 million loop iterations per call, and a wall-clock watchdog (`--javascript-timeout`, default 30 s; exit status 3). |
+| Memory | `--max-memory`, default 1024 MiB of heap; exit status 4. |
 
 The [security suite](security.md) checks these defaults, and checks what
 happens where they do not yet hold.

@@ -106,7 +106,7 @@ copied from [docs/benchmarks/2026-11-19.md](docs/benchmarks/2026-11-19.md).
 | 1000-row invoice: pagination and repeated headers | ✅ | ✅ | ✅ | ✅ |
 | Vector output (raster images on text pages) | **0** | 0 | 0 | 0 |
 | File reads and SSRF blocked (11 attacks) | **11/11** | 11/11 | 9/11 | 1/11 |
-| JavaScript/DoS cases handled (5) | 2/5 ⚠️ | 4/5 (no JS) | 3/5 | 3/5 |
+| Denial-of-service cases handled (5) | **4/5** (deep nesting aborts) | 4/5 (no JS) | 3/5 | 3/5 |
 | Typical one-page document | **0.07 s · 31 MB** | 0.02 s · 10 MB | 0.24 s · 35 MB | 0.36 s · 250 MB RSS (190 MB tree) |
 | React app with timers | **0.16 s · 48 MB** | — | — | 0.38 s · 249 MB |
 | 24-page invoice | 1.07 s · 60 MB | 0.08 s · 16 MB | 0.37 s · 47 MB | 0.71 s · 338 MB (tree) |
@@ -121,7 +121,8 @@ In short:
 - It does not leak local files or make network requests by default.
 - It is still slower than the native, JavaScript-free sghtmltopdf on static
   pages, and slower than everyone on very long tables.
-- It is **not yet hardened against JavaScript denial of service.**
+- Hostile JavaScript (endless loops, timer floods, memory bombs) is stopped
+  by built-in limits. Very deep HTML nesting can still abort the process.
 
 Full tables, method and raw output: [docs/benchmarks/](docs/benchmarks/README.md).
 
@@ -175,14 +176,6 @@ security finding blocks the release or is listed as a known issue.
 
 Found by our own test suites; details and plans are in [docs/roadmap.md](docs/roadmap.md#known-issues).
 
-- **JavaScript denial of service is not bounded yet.**
-  - `while (true) {}` hangs, because `--javascript-timeout` is checked only
-    between callbacks.
-  - Unbounded allocation runs until killed.
-  - A zero-delay timer flood stops only at the 30 s timeout.
-
-  Run bdhtml2pdf under an external timeout and memory limit (container,
-  `systemd-run -p MemoryMax=…`, `timeout`) when the HTML is untrusted.
 - **Very deep nesting.** More than about 3 000 nested elements makes rendering
   very slow (35–50 s), and 20 000 levels aborts the process.
 - **Ligature text.** Words with fi/fl/ffl ligatures lose those letters in
@@ -209,9 +202,14 @@ Found by our own test suites; details and plans are in [docs/roadmap.md](docs/ro
 | `-n, --disable-javascript` | | skip scripts |
 | `--javascript-delay` | `200` | virtual milliseconds of timers to run after load |
 | `--window-status` | | wait until `window.status` equals this value |
-| `--javascript-timeout` | `30` | wall-clock seconds for JavaScript |
+| `--javascript-timeout` | `30` | wall-clock seconds for JavaScript; a script still running after that ends the process with exit status 3 |
+| `--javascript-loop-limit` | `10000000` | loop iterations per JavaScript function call; stops `while (true) {}` (`0` = unlimited) |
+| `--max-memory` | `1024` | heap limit in MiB; exceeding it ends the process with exit status 4 (`0` = unlimited) |
 | `--debug-javascript` | | print JavaScript errors |
 | `-q, --quiet` | | no warnings |
+
+Exit status: `0` success, `1` error, `2` invalid arguments, `3` JavaScript
+time limit, `4` memory limit.
 
 ## Building
 
@@ -223,12 +221,12 @@ next to this repository:
 
 ```
 ../fulgur   fulgur-rs/fulgur, branch blitz-master (port to Blitz master + counter fix)
-../blitz    DioxusLabs/blitz at b4ad543 + public LayoutPassState/svg_source + serializer fix
+../blitz    DioxusLabs/blitz at b4ad543 + public LayoutPassState/svg_source/runtime limits, serializer and list-marker fixes
 ```
 
 ```sh
 cargo build --release          # target/release/bdhtml2pdf
-cargo test
+cargo test --release           # release: Boa is slow in debug builds
 bench/run.sh -n 5              # optional engines: SGH=… WK=… CHROME=…
 bench/security.sh
 ```

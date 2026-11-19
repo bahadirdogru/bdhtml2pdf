@@ -160,6 +160,7 @@ dependencies = [
  "blitz-vibey-script",
  "clap",
  "fulgur",
+ "libc",
  "stylo_static_prefs",
  "url",
 ]

@@ -4,9 +4,13 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::Duration;
 
+use bdhtml2pdf::limits::{EXIT_JS_TIMEOUT, LimitedAlloc, set_memory_limit};
 use bdhtml2pdf::page::{NAMED_SIZES, length_pt, named_size};
-use bdhtml2pdf::{JsOptions, PageOptions};
+use bdhtml2pdf::{JsOptions, JsTimeout, PageOptions};
 use clap::Parser;
+
+#[global_allocator]
+static ALLOC: LimitedAlloc = LimitedAlloc;
 
 #[derive(Parser)]
 #[command(name = "bdhtml2pdf", version, about = "HTML + JavaScript to PDF")]
@@ -54,6 +58,14 @@ struct Cli {
     /// Wall-clock limit for JavaScript, in seconds
     #[arg(long, default_value_t = 30)]
     javascript_timeout: u64,
+    /// Maximum loop iterations in one JavaScript function call; stops
+    /// `while (true) {}` with an error (0 = unlimited)
+    #[arg(long, default_value_t = bdhtml2pdf::lifecycle::DEFAULT_LOOP_LIMIT)]
+    javascript_loop_limit: u64,
+    /// Heap limit in MiB for the whole conversion; exit status 4 when
+    /// exceeded (0 = unlimited)
+    #[arg(long, default_value_t = 1024)]
+    max_memory: u64,
     /// Print JavaScript errors
     #[arg(long)]
     debug_javascript: bool,
@@ -66,13 +78,20 @@ fn page_options(cli: &Cli) -> Result<PageOptions, String> {
     let (mut width, mut height) = match (&cli.page_width, &cli.page_height) {
         (Some(w), Some(h)) => (length_pt(w)?, length_pt(h)?),
         _ => named_size(&cli.page_size).ok_or_else(|| {
-            format!("unknown page size {:?} (expected one of {NAMED_SIZES})", cli.page_size)
+            format!(
+                "unknown page size {:?} (expected one of {NAMED_SIZES})",
+                cli.page_size
+            )
         })?,
     };
     match cli.orientation.to_ascii_lowercase().as_str() {
         "portrait" => {}
         "landscape" => std::mem::swap(&mut width, &mut height),
-        o => return Err(format!("unknown orientation {o:?} (expected Portrait or Landscape)")),
+        o => {
+            return Err(format!(
+                "unknown orientation {o:?} (expected Portrait or Landscape)"
+            ));
+        }
     }
     Ok(PageOptions {
         width,
@@ -85,6 +104,10 @@ fn page_options(cli: &Cli) -> Result<PageOptions, String> {
 }
 
 fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
+    set_memory_limit(match cli.max_memory {
+        0 => None,
+        mib => Some(usize::try_from(mib.saturating_mul(1 << 20)).unwrap_or(usize::MAX)),
+    });
     bdhtml2pdf::prefs::init();
     let page = page_options(&cli)?;
 
@@ -96,7 +119,10 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
         let path = PathBuf::from(&cli.input);
         let html = std::fs::read_to_string(&path)
             .map_err(|e| format!("cannot read {}: {e}", path.display()))?;
-        let dir = path.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+        let dir = path
+            .parent()
+            .filter(|p| !p.as_os_str().is_empty())
+            .unwrap_or(Path::new("."));
         (html, dir.to_path_buf())
     };
 
@@ -108,8 +134,9 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
             window_status: cli.window_status.clone(),
             timeout: Duration::from_secs(cli.javascript_timeout),
             debug: cli.debug_javascript,
+            loop_limit: (cli.javascript_loop_limit > 0).then_some(cli.javascript_loop_limit),
         };
-        let res = bdhtml2pdf::run_scripts(&html, &base_dir, &js)?;
+        let res = bdhtml2pdf::run_scripts_bounded(html, base_dir.clone(), js)??;
         if !cli.quiet {
             if !res.status_reached {
                 eprintln!("warning: window.status was not reached before the timeout");
@@ -143,6 +170,11 @@ fn main() -> ExitCode {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("error: {e}");
+            if e.is::<JsTimeout>() {
+                // The JavaScript thread is still running; end the process
+                // without waiting for it.
+                std::process::exit(EXIT_JS_TIMEOUT);
+            }
             ExitCode::FAILURE
         }
     }

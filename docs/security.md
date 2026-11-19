@@ -36,8 +36,10 @@ headless-Chrome PDF services come from exactly this.
 | Network | No HTTP client is linked into the binary. `http(s)://`, `ws://` and `ftp://` resources are not fetched by HTML, CSS, SVG or JavaScript. |
 | Local files | Only files under the directory of the input HTML, after canonicalization, so `..` and symlinks cannot escape. `file:///etc/passwd` is refused. With stdin input, the current directory is the root. |
 | Frames and navigation | `<iframe>`, `<object>` and `<embed>` do not load documents. Navigation (`location.href`, meta refresh) does not replace the document. |
-| JavaScript time | Timers run on a virtual clock bounded by `--javascript-delay`. Wall clock is bounded by `--javascript-timeout`, **between** callbacks (see Known issues). |
-| Memory | No internal limit yet. Run under a cgroup or container limit. |
+| JavaScript loops | At most `--javascript-loop-limit` (10 million) loop iterations per function call. `while (true) {}` ends with an error that `try`/`catch` cannot intercept, and the page renders with the DOM as it is. |
+| JavaScript timers | Timers run on a virtual clock bounded by `--javascript-delay`. As in browsers, timers nested more than 5 deep wait at least 4 ms, so a `setTimeout(f, 0)` flood uses up the budget instead of spinning. |
+| JavaScript wall clock | Scripts run on a worker thread. If they are still running `--javascript-timeout` (30 s) + 2 s after the start, the process ends with exit status 3. This catches what the loop limit cannot see: endless promise chains, catastrophic regular expressions, slow built-ins. |
+| Memory | Heap allocations are counted. Above `--max-memory` (1024 MiB) the process ends with exit status 4 and a clear message, before the operating system's OOM handling. |
 
 ## Test suite
 
@@ -83,7 +85,7 @@ Summary:
 
 | Engine (defaults) | File reads and escapes (8) | SSRF (3) | Denial of service (5) |
 |---|---|---|---|
-| **bdhtml2pdf** | ✅ 8/8 blocked | ✅ 3/3 blocked | ❌ `while(true)` hangs · ❌ JS memory bomb runs until killed · ⚠️ 20 000-level nesting aborts (stack) · ⚠️ timer flood stops only at the 30 s wall-clock timeout · ✅ billion laughs |
+| **bdhtml2pdf** | ✅ 8/8 blocked | ✅ 3/3 blocked | ✅ `while(true)` stopped in 0.15 s · ✅ JS memory bomb stopped in 3.8 s at 47 MB · ✅ timer flood ends in 0.07 s · ✅ billion laughs · ⚠️ 20 000-level nesting aborts (stack) |
 | sghtmltopdf | ✅ 8/8 | ✅ 3/3 | ✅ for the JS cases, because it has no JavaScript · ⚠️ deep nesting exits with an error |
 | wkhtmltopdf | ✅ 8/8 (local file access is off by default since 0.12.6) | ❌ HTML/CSS and JavaScript (image, XHR, WebSocket) reach the internal server | ❌ billion laughs: OOM at 2 GB · ❌ deep nesting: SIGSEGV · ✅ loops are stopped after about 10 s |
 | headless Chromium | ❌ 6/8 leak: `/etc/passwd` through iframe, object, navigation and meta refresh; outside CSS, JS and symlinks load | ❌ HTML/CSS, JS (fetch, XHR, Image, WebSocket) and inline SVG | ❌ `while(true)` hangs · ❌ memory bomb: OOM at 2 GB · ✅ the rest |
@@ -95,10 +97,28 @@ What this means:
   the page asks for. Production setups have to add their own isolation.
 - **wkhtmltopdf** still has the SSRF class of CVE-2022-35583 with default
   settings.
-- **bdhtml2pdf** holds the file and network boundaries. It is **not yet safe
-  against JavaScript denial of service.** Until bounded execution lands (see
-  [roadmap](roadmap.md)), run it under an external timeout and memory limit, as
-  the hardening advice below says.
+- **bdhtml2pdf** holds the file and network boundaries, and bounds hostile
+  JavaScript in time and memory by default. Very deep HTML nesting can still
+  abort the process (see [roadmap](roadmap.md#known-issues)), so keep the
+  hardening advice below for untrusted input.
+
+## JavaScript limits in detail
+
+| Attack | What stops it | Result |
+|---|---|---|
+| `while (true) {}`, also inside `try`/`catch` | Boa's loop-iteration limit (an uncatchable engine error) | script ends, page renders, error reported with `--debug-javascript` |
+| JavaScript allocation in a loop | the loop limit, usually first | as above |
+| Allocation without loops (`new Array(4e8).fill(…)`) | `--max-memory` | exit status 4 |
+| `setInterval(f, 0)`, self-rescheduling `setTimeout(f, 0)` | HTML timer clamping on the virtual clock | ends when `--javascript-delay` is used up |
+| Endless microtasks (`Promise.resolve().then(f)` chains), catastrophic regular expressions | wall-clock watchdog | exit status 3 after `--javascript-timeout` + 2 s |
+
+The limits are covered by `tests/js_limits.rs` (`cargo test --release`). Its
+last case checks that heavy but finite scripts run unchanged: a million
+iterations in one call, thousands of calls with loops, and short timer chains.
+
+A watchdog timeout ends the whole process, because Boa cannot interrupt a
+running script from outside. A long-running service that embeds the library
+should therefore convert each document in a child process.
 
 ## Hardening advice for any engine
 

@@ -5,10 +5,11 @@
 
 pub mod fetch;
 pub mod lifecycle;
+pub mod limits;
 pub mod page;
 pub mod pdf;
 pub mod prefs;
 
-pub use lifecycle::{JsOptions, JsResult, run_scripts};
+pub use lifecycle::{JsOptions, JsResult, JsTimeout, run_scripts, run_scripts_bounded};
 pub use page::PageOptions;
 pub use pdf::render_pdf;
