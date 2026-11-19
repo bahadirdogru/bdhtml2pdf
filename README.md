@@ -1,69 +1,121 @@
+<div align="center">
+
 # bdhtml2pdf
 
-**A small, single-process HTML + JavaScript to vector PDF engine: a modern
-successor to wkhtmltopdf.** No Chromium, no WebKit, no Qt.
+**HTML + JavaScript → vector PDF, in one small process.**<br>
+A modern successor to wkhtmltopdf. No Chromium, no WebKit, no Qt.
+
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
+[![Rust 1.92+](https://img.shields.io/badge/rust-1.92%2B-orange)](#building)
+[![Status: pre-release](https://img.shields.io/badge/status-pre--release%200.1.0-yellow)](#known-issues)
+[![Security suite: 16/16](https://img.shields.io/badge/security%20suite-16%2F16-brightgreen)](docs/security.md)
+
+[Quick start](#quick-start) · [How it works](#how-it-works) · [Results](#results) · [Command line](#command-line) · [Docs](#documentation)
+
+<br>
+
+<a href="docs/showcase/showcase.pdf"><img src="docs/showcase/showcase.png" width="760" alt="A Turkish student report rendered by bdhtml2pdf: a gradient header, KPI cards, a table and an SVG bar chart built by JavaScript, and three-column text"></a>
+
+<sub>Rendered by bdhtml2pdf itself from <a href="docs/showcase/showcase.html">showcase.html</a>:<br>
+the cards, table and chart are built by JavaScript; the PNG is the same layout as the <a href="docs/showcase/showcase.pdf">vector PDF</a> (35 KB, text selectable).</sub>
+
+</div>
+
+---
 
 bdhtml2pdf takes the HTML your application already renders and runs its
-JavaScript (React, Vue, Preact, plain DOM code). It styles the page with
-Firefox's CSS engine, paginates it with print CSS, and writes a vector PDF with
-real, searchable text and subset fonts. It can also write PNG or JPEG
-screenshots, like wkhtmltoimage. All of this happens in one process of about
-28 MB, written in Rust.
+JavaScript: React, Vue, Preact or plain DOM code. It styles the page with
+**Firefox's CSS engine**, paginates it with print CSS, and writes a **vector
+PDF** with real, searchable text and subset fonts. It can also write **PNG or
+JPEG** images of the same layout, like wkhtmltoimage. All of this happens in
+one process of about 31 MB, written in Rust.
 
-> **Status: pre-release (0.1.0).** It works end to end and is measured below,
-> but it still builds against patched sibling checkouts of fulgur and Blitz
-> (see [Building](#building)). Read [Known issues](#known-issues) before using
-> it on untrusted input.
+|  |  |
+|---|---|
+| ⚡ **Modern web** | ES2022+ JavaScript, React 18 / Vue 3 / Preact, CSS nesting, `:has()`, `@layer`, grid, flex, multi-column, `oklch()` and `color-mix()` |
+| 📄 **Real PDF** | text stays text, fonts are subset, `@page` and margin boxes, running headers, counters, repeated table headers |
+| 🪶 **Small** | one 31 MB binary, ~30–50 MB of memory per page, 0.07 s for a typical document |
+| 🔒 **Safe by default** | no network, files confined to the input directory, bounded JavaScript |
+| 🇹🇷 **Turkish first** | the whole alphabet in every face, `lang="tr"` case mapping: `istanbul` → **İSTANBUL** |
+| 🖼️ **Images too** | PNG and JPEG from the PDF layout, so multi-column text and pagination look the same |
+
+> [!NOTE]
+> **Pre-release (0.1.0).** It works end to end and every claim below is
+> measured, but it still builds against patched sibling checkouts of fulgur
+> and Blitz (see [Building](#building)). Read [Known issues](#known-issues)
+> before using it on untrusted input.
+
+## Quick start
 
 ```sh
 bdhtml2pdf invoice.html invoice.pdf
-bdhtml2pdf --page-size A4 --orientation Landscape --margin-top 15mm report.html report.pdf
-bdhtml2pdf --window-status ready --javascript-delay 2000 dashboard.html dashboard.pdf
-bdhtml2pdf app.html rendered-dom.html   # write the DOM after JavaScript instead of a PDF
-bdhtml2pdf --width 1280 page.html page.png          # image of the whole page
-bdhtml2pdf --height 630 --zoom 2 card.html card.jpg # fixed size, twice the pixels
 ```
+
+<table>
+<tr><th>PDF</th><th>JavaScript-heavy pages</th><th>Images</th></tr>
+<tr valign="top"><td>
+
+```sh
+bdhtml2pdf \
+  --page-size A4 \
+  --orientation Landscape \
+  --margin-top 15mm \
+  report.html report.pdf
+```
+
+</td><td>
+
+```sh
+# wait for the page to say it is done
+bdhtml2pdf \
+  --window-status ready \
+  --javascript-delay 2000 \
+  dashboard.html dashboard.pdf
+```
+
+</td><td>
+
+```sh
+# the whole page, 1280 px wide
+bdhtml2pdf --width 1280 page.html page.png
+
+# fixed size, twice the pixels
+bdhtml2pdf --height 630 --zoom 2 \
+  card.html card.jpg
+```
+
+</td></tr>
+</table>
+
+Need to see what JavaScript produced? `bdhtml2pdf app.html dom.html` writes
+the DOM after scripts ran instead of a PDF.
 
 ## Why
 
 PDF generation sits in the middle of a lot of everyday systems:
+certificates and course reports, invoices and statements, analytics exports,
+worksheets, tickets, labels and contracts. The templates are almost always
+HTML, and increasingly that HTML is built by JavaScript and styled with modern
+CSS. The usual engines force a bad trade:
 
-- e-learning certificates and reports;
-- invoices and statements;
-- analytics exports;
-- worksheets and printed course material;
-- tickets, labels and contracts.
-
-The templates are almost always HTML, and increasingly that HTML is built by
-JavaScript and styled with modern CSS.
-
-The usual engines force a bad trade:
-
-- **wkhtmltopdf** is archived (2023). Its 2012-era WebKit cannot run ES2015+
-  (React, Vue and Preact render blank) or modern CSS. It has a known SSRF
-  (CVE-2022-35583).
-- **Headless Chromium** renders everything, but costs a 432 MB install, about
-  200–340 MB per conversion across several processes, and browser pools to
-  babysit. It also brings a full browser's attack surface: with default flags
-  it read `/etc/passwd` and made internal network requests in our security
-  suite.
-- **Native PDF libraries** are fast, but every HTML template has to be
-  rewritten in their API.
-- **New native HTML engines** (e.g. sghtmltopdf) are small and fast, but have
-  no JavaScript and only a hand-written subset of CSS.
+| Engine | The catch |
+|---|---|
+| **wkhtmltopdf** | Archived in 2023. Its 2012-era WebKit cannot run ES2015+ (React, Vue and Preact render blank) or modern CSS. Known SSRF (CVE-2022-35583). |
+| **Headless Chromium** | Renders everything, but costs a 432 MB install, about 200–340 MB per conversion across several processes, and browser pools to babysit. With default flags it read `/etc/passwd` and made internal network requests in our security suite. |
+| **Native PDF libraries** | Fast, but every HTML template has to be rewritten in their API. |
+| **New native HTML engines** (e.g. sghtmltopdf) | Small and fast, but no JavaScript and only a hand-written subset of CSS. |
 
 We wanted **modern JS + modern CSS + vector PDF + small footprint** together.
 Nobody shipped that, but every hard part already existed as a maintained Rust
 library. So we wrote the glue instead of another engine.
-→ [docs/why.md](docs/why.md) has the full reasoning and the alternatives we
-measured.
+→ [docs/why.md](docs/why.md)
 
 **Turkish is a first-class requirement.** The full alphabet
 **Ç ç Ğ ğ I ı İ i Ö ö Ş ş Ü ü** is tested in system fonts, web fonts, bold
-and italic, and it round-trips through PDF text extraction. Language-sensitive
-case mapping works: `text-transform: uppercase` with `lang="tr"` turns
-`istanbul` into **İSTANBUL**, and `capitalize` turns `izmir` into **İzmir**.
-These are the kinds of details engines get wrong.
+and italic, and it round-trips through PDF text extraction. `text-transform:
+uppercase` with `lang="tr"` turns `istanbul` into **İSTANBUL**, and
+`capitalize` turns `izmir` into **İzmir**: the kind of detail engines get
+wrong.
 
 ## How it works
 
@@ -76,30 +128,30 @@ HTML ─► html5ever ─► Blitz DOM ◄──► Boa JavaScript        (one D
                          │   pagination, table/multicol fragmentation
                          ▼
                      Krilla: vector PDF, subset fonts, text as text
-
-Image output: the same layout on one page as tall as the content ─► hayro ─► PNG / JPEG
+                         │
+                         └─► (images) hayro rasterizes a page as tall as the content ─► PNG / JPEG
 ```
 
 | Component | Role |
 |---|---|
 | [Blitz](https://github.com/DioxusLabs/blitz) + `blitz-vibey-script` | DOM, style and layout glue, and the JavaScript ↔ DOM binding |
-| [Stylo](https://github.com/servo/stylo) 0.24 | CSS cascade, the engine Firefox uses |
-| [Taffy](https://github.com/DioxusLabs/taffy) / [Parley](https://github.com/linebender/parley) | block/flex/grid layout / text shaping and line breaking |
+| [Stylo](https://github.com/servo/stylo) 0.24 | CSS cascade: the engine Firefox uses |
+| [Taffy](https://github.com/DioxusLabs/taffy) · [Parley](https://github.com/linebender/parley) | block/flex/grid layout · text shaping and line breaking |
 | [Boa](https://github.com/boa-dev/boa) 0.22 | JavaScript engine, pure Rust |
-| [fulgur](https://github.com/fulgur-rs/fulgur) | paged media (GCPM), pagination, PDF layout (ported by us to current Blitz) |
+| [fulgur](https://github.com/fulgur-rs/fulgur) | paged media (GCPM), pagination, PDF layout; ported by us to current Blitz |
 | [Krilla](https://github.com/LaurenzV/krilla) | PDF writer |
 | [hayro](https://github.com/LaurenzV/hayro) | image output: rasterizes the PDF page (pure Rust, on vello_cpu) |
 
-All of it is Rust except the system fontconfig. → [docs/architecture.md](docs/architecture.md)
-covers the pipeline, all dependencies with versions and licenses, and the
-patches we send upstream.
+Everything is Rust except the system fontconfig. Every change we need in Blitz
+and fulgur goes upstream as a pull request.
+→ [docs/architecture.md](docs/architecture.md)
 
 ## Results
 
 Measured on 2026-11-19 on an i7-12800H with Fedora 45. Every engine ran the
 same pages with its default settings (median of 5 runs; memory is the largest
-process's RSS, plus the whole process tree for Chromium). The numbers below are
-copied from [docs/benchmarks/2026-11-19.md](docs/benchmarks/2026-11-19.md).
+process's RSS, plus the whole process tree for Chromium). Copied from
+[docs/benchmarks/2026-11-19.md](docs/benchmarks/2026-11-19.md).
 
 | | **bdhtml2pdf** 0.1.0 | sghtmltopdf 0.8.0 | wkhtmltopdf 0.12.6.1 | Chromium 157 headless |
 |---|---|---|---|---|
@@ -118,23 +170,18 @@ copied from [docs/benchmarks/2026-11-19.md](docs/benchmarks/2026-11-19.md).
 | 24-page invoice | 1.07 s · 60 MB | 0.08 s · 16 MB | 0.37 s · 47 MB | 0.71 s · 338 MB (tree) |
 | Install size | **25 MB**, one file ¹ | 13 MB | 39 MB | 432 MB |
 
-¹ 31.5 MB since image output was added (the PDF rasterizer and PNG/JPEG encoders).
+<sub>¹ 31.5 MB since image output was added (the PDF rasterizer and PNG/JPEG encoders).</sub>
 
-In short:
+**In short:** bdhtml2pdf is the only engine besides Chromium that runs modern
+JavaScript apps and modern CSS, with about **1/8 of Chromium's memory and
+1/17 of its install size**, in a single process. It does not leak local files
+or make network requests by default, and hostile JavaScript (endless loops,
+timer floods, memory bombs) is stopped by built-in limits. It is still slower
+than the JavaScript-free sghtmltopdf on static pages, and slower than everyone
+on very long tables.
 
-- bdhtml2pdf is the only engine besides Chromium that runs modern JavaScript
-  apps and modern CSS.
-- It does so with about **1/8 of Chromium's memory and 1/17 of its install
-  size**, in a single process.
-- It does not leak local files or make network requests by default.
-- It is still slower than the native, JavaScript-free sghtmltopdf on static
-  pages, and slower than everyone on very long tables.
-- Hostile JavaScript (endless loops, timer floods, memory bombs) is stopped
-  by built-in limits. Very deep HTML nesting is flattened, as browsers do.
-
-Full tables, method and raw output: [docs/benchmarks/](docs/benchmarks/README.md).
-
-## What is tested
+<details>
+<summary><b>What is tested</b></summary>
 
 Every check is a plain HTML page that goes through all engines unchanged.
 Results are read back from the PDF with poppler; nothing is judged by eye.
@@ -150,18 +197,102 @@ Results are read back from the PDF with poppler; nothing is judged by eye.
 | **PDF output** | page size, page count, file size, raster images (should be 0 for text), fonts embedded and subset |
 | **Security** (16) | local file reads, directory and symlink escapes, SSRF from HTML/CSS/SVG/JS, infinite loops, timer floods, memory bombs, billion laughs, deep nesting |
 
-→ [docs/testing.md](docs/testing.md) · [docs/security.md](docs/security.md)
+Each release runs `bench/run.sh` and `bench/security.sh` against bdhtml2pdf,
+wkhtmltopdf, headless Chromium and sghtmltopdf on the same machine, each engine
+in its own systemd transient service, and commits the unedited output as
+`docs/benchmarks/<version>.md`. A regression in correctness or a new security
+finding blocks the release or is listed as a known issue.
 
-### Benchmarks are part of every release
+→ [docs/testing.md](docs/testing.md) · [docs/security.md](docs/security.md) · [docs/benchmarks/](docs/benchmarks/README.md)
 
-Each release runs `bench/run.sh` (correctness, time, memory and PDF facts) and
-`bench/security.sh` (hostile pages) against bdhtml2pdf, wkhtmltopdf, headless
-Chromium and sghtmltopdf on the same machine. The unedited output is
-committed as `docs/benchmarks/<version>.md`. Each engine runs in its own
-systemd transient service, so time and memory, including all of Chromium's
-processes, are measured the same way. A regression in correctness or a new
-security finding blocks the release or is listed as a known issue.
-→ [docs/benchmarks/README.md](docs/benchmarks/README.md#release-procedure)
+</details>
+
+## Command line
+
+```
+bdhtml2pdf [OPTIONS] <INPUT> <OUTPUT>
+```
+
+`INPUT` and `OUTPUT` are files, or `-` for stdin/stdout. The output extension
+picks the format: `.pdf`, `.png`, `.jpg`/`.jpeg`, or `.html` (the DOM after
+JavaScript). Anything else is PDF; `-f, --format pdf|png|jpg|html` overrides it.
+
+<table>
+<tr><th>Option</th><th>Default</th><th>Meaning</th></tr>
+<tr><th colspan="3" align="left">📄 Page (PDF)</th></tr>
+<tr><td><code>-s, --page-size</code></td><td><code>A4</code></td><td>A3, A4, A5, B4, B5, Letter, Legal, Ledger</td></tr>
+<tr><td><code>-O, --orientation</code></td><td><code>Portrait</code></td><td><code>Portrait</code> or <code>Landscape</code></td></tr>
+<tr><td><code>--page-width</code>, <code>--page-height</code></td><td></td><td>custom size, e.g. <code>210mm</code></td></tr>
+<tr><td><code>-T/-B/-L/-R, --margin-*</code></td><td><code>10mm</code></td><td><code>mm</code>, <code>cm</code>, <code>in</code>, <code>pt</code>, <code>px</code></td></tr>
+<tr><td><code>--title</code></td><td></td><td>PDF title</td></tr>
+<tr><th colspan="3" align="left">🖼️ Image (PNG, JPEG)</th></tr>
+<tr><td><code>--width</code></td><td><code>1024</code></td><td>viewport width in pixels</td></tr>
+<tr><td><code>--height</code></td><td><code>0</code></td><td>image height in pixels; <code>0</code> captures the whole page (up to 32 768 pixels)</td></tr>
+<tr><td><code>--zoom</code></td><td><code>1</code></td><td>device pixels per CSS pixel</td></tr>
+<tr><td><code>--quality</code></td><td><code>94</code></td><td>JPEG quality, 1–100</td></tr>
+<tr><th colspan="3" align="left">⚙️ JavaScript</th></tr>
+<tr><td><code>-n, --disable-javascript</code></td><td></td><td>skip scripts</td></tr>
+<tr><td><code>--javascript-delay</code></td><td><code>200</code></td><td>virtual milliseconds of timers to run after load</td></tr>
+<tr><td><code>--window-status</code></td><td></td><td>wait until <code>window.status</code> equals this value</td></tr>
+<tr><td><code>--javascript-timeout</code></td><td><code>30</code></td><td>wall-clock seconds; a script still running after that ends the process (exit 3)</td></tr>
+<tr><td><code>--javascript-loop-limit</code></td><td><code>10000000</code></td><td>loop iterations per function call; stops <code>while (true) {}</code> (<code>0</code> = unlimited)</td></tr>
+<tr><td><code>--max-memory</code></td><td><code>1024</code></td><td>heap limit in MiB; exceeding it ends the process (exit 4; <code>0</code> = unlimited)</td></tr>
+<tr><td><code>--debug-javascript</code></td><td></td><td>print JavaScript errors</td></tr>
+<tr><th colspan="3" align="left">Other</th></tr>
+<tr><td><code>-q, --quiet</code></td><td></td><td>no warnings</td></tr>
+</table>
+
+**Exit status:** `0` success · `1` error · `2` invalid arguments · `3`
+JavaScript time limit · `4` memory limit.
+
+**Resources:** `<link>`, `@import`, images and fonts load from the input
+file's directory and below, plus `data:` URLs. Nothing is fetched from the
+network. → [docs/security.md](docs/security.md)
+
+## Known issues
+
+Found by our own test suites; details and plans are in
+[docs/roadmap.md](docs/roadmap.md#known-issues).
+
+- **Multi-column layout is partial.** Paragraphs placed directly in the
+  multicol box flow across columns, in PDF and images. Content inside a
+  wrapper element is not split, and a paragraph after one that breaks across
+  columns starts a new column. `column-rule` colors must be hex, named,
+  `rgb()` or `hsl()`.
+- **Ligature text.** Words with fi/fl/ffl ligatures lose those letters in
+  extracted text: `office` → `ofce`.
+- **No `Intl` in JavaScript.** `toLocaleUpperCase('tr-TR')`,
+  `localeCompare(…, 'tr')` and `Intl.NumberFormat` fail. Turkish case mapping
+  in CSS works.
+- **Not supported yet:** container queries, subgrid, Canvas 2D (`<canvas>`
+  charts; SVG charts work), and the wkhtmltopdf header/footer flags.
+- **Long tables are slower than they should be:** about 1 s for 24 pages.
+- **Extremely deep nesting parses slowly.** 20 000 nested elements take about
+  1 s, but parsing time grows with the square of the depth: 80 000 levels take
+  about 27 s. With JavaScript on, `--javascript-timeout` bounds it.
+- **Build:** depends on patched sibling checkouts of fulgur and Blitz until the
+  upstream pull requests are merged.
+
+## Building
+
+Requirements: Rust 1.92+ and the fontconfig development files
+(`fontconfig-devel` on Fedora, `libfontconfig1-dev` on Debian/Ubuntu).
+
+Until the upstream pull requests land, the build expects patched checkouts
+next to this repository:
+
+```
+../fulgur   github.com/bahadirdogru/fulgur, branch blitz-master  (fulgur-rs/fulgur#969)
+../blitz    github.com/bahadirdogru/blitz,  branch public-layout-pass
+            (DioxusLabs/blitz#1664, #1665, #1666, #1671, #1677)
+```
+
+```sh
+cargo build --release          # → target/release/bdhtml2pdf
+cargo test --release           # release: Boa is slow in debug builds
+bench/run.sh -n 5              # optional engines: SGH=… WK=… CHROME=…
+bench/security.sh
+```
 
 ## Goals
 
@@ -180,85 +311,22 @@ security finding blocks the release or is listed as a known issue.
 
 → [docs/roadmap.md](docs/roadmap.md)
 
-## Known issues
-
-Found by our own test suites; details and plans are in [docs/roadmap.md](docs/roadmap.md#known-issues).
-
-- **Extremely deep nesting parses slowly.** 20 000 nested elements take about
-  1 s, but HTML parsing time grows with the square of the depth: 80 000
-  levels take about 27 s. With JavaScript on, `--javascript-timeout` bounds it.
-- **Ligature text.** Words with fi/fl/ffl ligatures lose those letters in
-  extracted text: `office` → `ofce`.
-- **No `Intl` in JavaScript.** `toLocaleUpperCase('tr-TR')`,
-  `localeCompare(…, 'tr')` and `Intl.NumberFormat` fail. Turkish case mapping
-  in CSS works.
-- **Not supported yet:** container queries, subgrid, Canvas 2D (`<canvas>`
-  charts), and the wkhtmltopdf header/footer flags.
-- **Long tables are slower than they should be:** about 1 s for 24 pages.
-- **Build:** depends on patched sibling checkouts of fulgur and Blitz until the
-  upstream pull requests are merged.
-
-## Command line
-
-| Option | Default | Meaning |
-|---|---|---|
-| `input` `output` | | Files, or `-` for stdin/stdout. The output extension picks the format: `.pdf`, `.png`, `.jpg`/`.jpeg`, or `.html` (the post-JavaScript DOM). Anything else is PDF. |
-| `-f, --format` | | `pdf`, `png`, `jpg` or `html`, overriding the extension |
-| `-s, --page-size` | `A4` | A3, A4, A5, B4, B5, Letter, Legal, Ledger |
-| `-O, --orientation` | `Portrait` | `Portrait` or `Landscape` |
-| `--page-width`, `--page-height` | | custom size, e.g. `210mm` |
-| `-T/-B/-L/-R, --margin-*` | `10mm` | `mm`, `cm`, `in`, `pt`, `px` |
-| `--title` | | PDF title |
-| `--width` | `1024` | image: viewport width in pixels |
-| `--height` | `0` | image: height in pixels; `0` captures the whole page (up to 32 768 pixels) |
-| `--zoom` | `1` | image: device pixels per CSS pixel |
-| `--quality` | `94` | image: JPEG quality, 1–100 |
-| `-n, --disable-javascript` | | skip scripts |
-| `--javascript-delay` | `200` | virtual milliseconds of timers to run after load |
-| `--window-status` | | wait until `window.status` equals this value |
-| `--javascript-timeout` | `30` | wall-clock seconds for JavaScript; a script still running after that ends the process with exit status 3 |
-| `--javascript-loop-limit` | `10000000` | loop iterations per JavaScript function call; stops `while (true) {}` (`0` = unlimited) |
-| `--max-memory` | `1024` | heap limit in MiB; exceeding it ends the process with exit status 4 (`0` = unlimited) |
-| `--debug-javascript` | | print JavaScript errors |
-| `-q, --quiet` | | no warnings |
-
-Exit status: `0` success, `1` error, `2` invalid arguments, `3` JavaScript
-time limit, `4` memory limit.
-
-## Building
-
-Requirements: Rust 1.89+ and fontconfig development files
-(`fontconfig-devel` / `libfontconfig1-dev`).
-
-Until the upstream pull requests land, the build expects patched checkouts
-next to this repository:
-
-```
-../fulgur   fulgur-rs/fulgur, branch blitz-master (port to Blitz master + counter fix)
-../blitz    DioxusLabs/blitz at b4ad543 + public LayoutPassState/svg_source/runtime limits, serializer and list-marker fixes
-```
-
-```sh
-cargo build --release          # target/release/bdhtml2pdf
-cargo test --release           # release: Boa is slow in debug builds
-bench/run.sh -n 5              # optional engines: SGH=… WK=… CHROME=…
-bench/security.sh
-```
-
 ## Documentation
 
 | Document | Contents |
 |---|---|
-| [docs/why.md](docs/why.md) | use cases, alternatives, and why we built this |
-| [docs/architecture.md](docs/architecture.md) | pipeline, source layout, dependencies, upstream patches, resource policy |
-| [docs/testing.md](docs/testing.md) | every test suite and how it is scored |
-| [docs/security.md](docs/security.md) | threat model, defaults, security suite |
-| [docs/benchmarks/](docs/benchmarks/README.md) | method, release procedure, results per release |
-| [docs/roadmap.md](docs/roadmap.md) | goals, status, known issues, roadmap |
-| [docs/research.md](docs/research.md) | original research notes: candidates, the Stylo blocker, early measurements |
+| [why.md](docs/why.md) | use cases, alternatives, and why we built this |
+| [architecture.md](docs/architecture.md) | pipeline, source layout, dependencies, upstream patches, resource policy |
+| [testing.md](docs/testing.md) | every test suite and how it is scored |
+| [security.md](docs/security.md) | threat model, defaults, security suite |
+| [benchmarks/](docs/benchmarks/README.md) | method, release procedure, results per release |
+| [roadmap.md](docs/roadmap.md) | goals, status, known issues, roadmap |
+| [research.md](docs/research.md) | original research notes: candidates, the Stylo blocker, early measurements |
 
 ## License
 
 GPL-3.0-or-later; see [LICENSE](LICENSE). The bundled libraries keep their own
-licenses (MIT, Apache-2.0, MPL-2.0); see [docs/architecture.md](docs/architecture.md#components-and-dependencies).
-Test fonts are under the SIL Open Font License ([tests/fixtures/fonts](tests/fixtures/fonts/README.md)).
+licenses (MIT, Apache-2.0, MPL-2.0); see
+[docs/architecture.md](docs/architecture.md#components-and-dependencies).
+Test fonts are under the SIL Open Font License
+([tests/fixtures/fonts](tests/fixtures/fonts/README.md)).

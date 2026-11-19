@@ -172,3 +172,20 @@ fn viewport_units_follow_the_viewport_not_the_page_length() {
     assert!(near(img.get_pixel(50, 760), [0, 0, 255]));
     assert!(near(img.get_pixel(50, 860), [255, 0, 0]));
 }
+
+#[test]
+fn a_fixed_height_crops_instead_of_paginating() {
+    // A block taller than --height used to move to a second page, leaving
+    // the image empty.
+    let dir = tempdir("crop");
+    let input = page(
+        &dir,
+        "<div style='height:20px'></div>\
+         <div style='height:300px;background:rgb(0,0,255);break-inside:avoid'></div>",
+    );
+    let out = dir.join("out.png");
+    convert(&input, &out, &["--width", "100", "--height", "100"]);
+    let img = image::open(&out).unwrap();
+    assert_eq!(img.dimensions(), (100, 100));
+    assert!(near(img.get_pixel(50, 60), [0, 0, 255]));
+}

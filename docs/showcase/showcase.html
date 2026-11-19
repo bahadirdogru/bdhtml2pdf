@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>bdhtml2pdf showcase</title>
+<!--
+  The README image. Regenerate with:
+    bdhtml2pdf --width 960 --zoom 2 docs/showcase/showcase.html docs/showcase/showcase.png
+    bdhtml2pdf --page-size A4 docs/showcase/showcase.html docs/showcase/showcase.pdf
+-->
+<style>
+  :root {
+    --ink: oklch(25% 0.03 260);
+    --muted: oklch(52% 0.03 260);
+    --accent: oklch(58% 0.19 265);
+    --accent-2: oklch(70% 0.16 160);
+    --line: color-mix(in oklch, var(--ink) 12%, white);
+    --card: color-mix(in oklch, var(--accent) 6%, white);
+  }
+  @page { size: A4; margin: 12mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: sans-serif; color: var(--ink); background: white; font-size: 14px; line-height: 1.5; }
+  .page { padding: 32px 40px 40px; }
+
+  header {
+    display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 24px;
+    padding: 28px 32px; border-radius: 16px; color: white;
+    background: linear-gradient(120deg, var(--accent), oklch(55% 0.2 300));
+  }
+  header h1 { margin: 0; font-size: 30px; line-height: 1.15; }
+  header p { margin: 6px 0 0; opacity: .85; }
+  .city { text-transform: uppercase; letter-spacing: .08em; font-weight: 700; font-size: 13px; text-align: right; }
+  .city small { display: block; font-weight: 400; letter-spacing: 0; opacity: .8; text-transform: none; }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 22px 0; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .kpi b { display: block; font-size: 24px; color: var(--accent); }
+  .kpi span { color: var(--muted); font-size: 12px; }
+
+  .row { display: grid; grid-template-columns: 1.15fr 1fr; gap: 22px; }
+  h2 { font-size: 15px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .panel { border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 600; border-bottom: 2px solid var(--line); padding: 6px 4px; }
+  td { padding: 6px 4px; border-bottom: 1px solid var(--line); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: 0; }
+  .bar { height: 6px; border-radius: 3px; background: var(--accent-2); }
+  tfoot td { font-weight: 700; border-top: 2px solid var(--line); }
+
+  .columns {
+    columns: 3; column-gap: 26px; column-rule: 1px solid #dde0ea;
+    margin-top: 22px; text-align: justify; hyphens: auto;
+  }
+  .columns p { margin: 0 0 10px; }
+  .columns h3 { column-span: all; margin: 0 0 10px; font-size: 15px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .note { margin: 14px 0 0; padding: 10px 12px; border-radius: 8px; background: var(--card); color: var(--muted); font-size: 12.5px; }
+  .note b { color: var(--ink); }
+  footer { margin-top: 18px; display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; background: color-mix(in oklch, var(--accent-2) 22%, white); color: oklch(40% 0.1 160); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div>
+      <h1>Öğrenci Başarı Raporu</h1>
+      <p>Güz dönemi · rendered from HTML, CSS and JavaScript by bdhtml2pdf</p>
+    </div>
+    <div class="city" lang="tr">istanbul · izmir<small>CSS <code>text-transform</code> with <code>lang="tr"</code></small></div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="row">
+    <section class="panel">
+      <h2>Dersler</h2>
+      <table>
+        <thead><tr><th>Ders</th><th class="num">Not</th><th style="width:38%">Ağırlıklı</th></tr></thead>
+        <tbody id="rows"></tbody>
+        <tfoot><tr><td>Ortalama</td><td class="num" id="avg"></td><td></td></tr></tfoot>
+      </table>
+    </section>
+    <section class="panel">
+      <h2>Haftalık çalışma (saat)</h2>
+      <svg id="chart" viewBox="0 0 380 190" width="100%" role="img" aria-label="Weekly study hours"></svg>
+      <p class="note" id="note"></p>
+    </section>
+  </div>
+
+  <section class="columns">
+    <h3>Çok sütunlu düzen</h3>
+    <p>Bu bölüm CSS <code>columns: 3</code> ile dizildi: metin üç sütuna akar, aralarında bir çizgi vardır ve başlık <code>column-span: all</code> ile tüm sütunları kaplar. Aynı düzen PDF'te de, PNG ve JPEG görüntülerde de aynen görünür, çünkü görüntü PDF sayfasından üretilir. Yukarıdaki tablo, kartlar ve grafik sayfa yüklendikten sonra JavaScript ile oluşturuldu: bdhtml2pdf betikleri Boa ile çalıştırır, zamanlayıcıları sanal bir saatle boşaltır ve son DOM'u Firefox'un CSS motoru Stylo ile biçimler. Türkçe karakterler arama ve kopyalama için gerçek metin olarak kalır: Ç ç Ğ ğ I ı İ i Ö ö Ş ş Ü ü. Grafik vektördür; yazılar seçilebilir, fontlar yalnızca kullanılan harflerle gömülür.</p>
+  </section>
+
+  <footer>
+    <span>bdhtml2pdf 0.1.0 · one process · no Chromium</span>
+    <span class="badge" id="stamp"></span>
+  </footer>
+</div>
+
+<script>
+  const courses = [
+    ["Matematik", 92], ["Fizik", 85], ["Kimya", 78],
+    ["Türk Dili ve Edebiyatı", 95], ["İngilizce", 88], ["Tarih", 81],
+  ];
+  const rows = document.getElementById("rows");
+  for (const [name, grade] of courses) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${name}</td><td class="num">${grade}</td>
+      <td><div class="bar" style="width:${grade}%"></div></td>`;
+    rows.append(tr);
+  }
+  const avg = courses.reduce((s, [, g]) => s + g, 0) / courses.length;
+  document.getElementById("avg").textContent = avg.toFixed(1).replace(".", ",");
+
+  const kpis = [
+    [avg.toFixed(1).replace(".", ","), "genel ortalama"],
+    [`${courses.length}`, "ders"],
+    ["%96", "devam oranı"],
+    ["3.", "sınıf sıralaması"],
+  ];
+  document.getElementById("kpis").innerHTML = kpis
+    .map(([v, l]) => `<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join("");
+
+  const hours = [["Pzt", 3], ["Sal", 4.5], ["Çar", 2], ["Per", 5], ["Cum", 3.5], ["Cmt", 6], ["Paz", 1.5]];
+  const svg = document.getElementById("chart");
+  const ns = "http://www.w3.org/2000/svg";
+  const max = 6, h = 150, bw = 30, gap = 20;
+  const add = (tag, attrs, text) => {
+    const el = document.createElementNS(ns, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    if (text !== undefined) el.textContent = text;
+    svg.append(el);
+  };
+  for (const y of [0, 2, 4, 6]) {
+    const py = 10 + h - (y / max) * h;
+    add("line", { x1: 26, x2: 376, y1: py, y2: py, stroke: "#e3e5ee" });
+    add("text", { x: 18, y: py + 4, "font-size": 11, fill: "#7a7f94", "text-anchor": "end", "font-family": "sans-serif" }, y);
+  }
+  hours.forEach(([day, v], i) => {
+    const x = 36 + i * (bw + gap), bh = (v / max) * h;
+    add("rect", { x, y: 10 + h - bh, width: bw, height: bh, rx: 5, fill: i === 5 ? "#3fb68b" : "#5b6ef0" });
+    add("text", { x: x + bw / 2, y: 10 + h + 18, "font-size": 12, fill: "#4a4f63", "text-anchor": "middle", "font-family": "sans-serif" }, day);
+  });
+
+  const total = hours.reduce((s, [, v]) => s + v, 0);
+  const [busiest] = hours.reduce((a, b) => (b[1] > a[1] ? b : a));
+  document.getElementById("note").innerHTML =
+    `Toplam <b>${String(total).replace(".", ",")} saat</b>; en yoğun gün <b>${busiest}</b>. ` +
+    `Grafik, JavaScript'in oluşturduğu SVG'dir ve PDF'te vektör olarak kalır.`;
+
+  setTimeout(() => {
+    document.getElementById("stamp").textContent = "rendered after a 100 ms timer ✓";
+  }, 100);
+</script>
+</body>
+</html>

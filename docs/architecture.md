@@ -103,6 +103,7 @@ pull requests.
 | fulgur | Variable font coordinates passed to Krilla | Parley picks bold from a variable font (`NotoSans[wght]`) by setting `wght`; Krilla drew the default instance, so bold printed as regular. |
 | fulgur | `data:` images decoded and served | `<img src="data:…">` and `url(data:…)` were silently dropped. |
 | fulgur | `viewport_height` option | Image output lays out on a page as tall as the content; `vh` must still follow the viewport. |
+| fulgur | SVG generic font families follow fontconfig | usvg's defaults are fixed names (`Arial`, `Times New Roman`); where they are not installed, `<text font-family="sans-serif">` in inline SVG (charts) was dropped. |
 | Blitz | An `@import` whose URL does not parse is refused | `@import url("http://[::1")` aborted the process (`unwrap()` on `None`). |
 
 ## Resource policy

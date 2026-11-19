@@ -102,18 +102,24 @@ pub fn render_image(
     // `vh` units and `height: 100%` on the root follow the viewport, as in a
     // browser, not the page, which is only as tall as the image.
     let viewport = opts.height.unwrap_or(DEFAULT_VIEWPORT_HEIGHT) as f32;
-    let (height_px, truncated) = match opts.height {
+    // Lay out on the tallest page an image may have, then size the page to
+    // the content. A fixed `--height` crops that page, as a browser window
+    // does; a page only that tall would push blocks that do not fit onto a
+    // second page instead.
+    let (bottom, more) = first_page_extent(html, base_dir, &page(max_css), Some(viewport))?;
+    let page_px = bottom.max(viewport).min(max_css).ceil();
+    let (crop_px, truncated) = match opts.height {
         Some(h) => ((h as f32).min(max_css), h as f32 > max_css),
-        None => {
-            // Lay out on the tallest page an image may have, then size the
-            // page to the content.
-            let (bottom, more) = first_page_extent(html, base_dir, &page(max_css), Some(viewport))?;
-            let bottom = bottom.max(viewport).min(max_css);
-            (bottom.ceil(), more)
-        }
+        None => (page_px, more),
     };
 
-    let pdf = render_pdf_with_viewport(html, base_dir, &page(height_px), None, Some(viewport))?;
+    let pdf = render_pdf_with_viewport(
+        html,
+        base_dir,
+        &page(page_px.max(crop_px)),
+        None,
+        Some(viewport),
+    )?;
     let pdf = Pdf::new(pdf).map_err(|e| format!("cannot read the generated PDF: {e:?}"))?;
     let first = pdf
         .pages()
@@ -132,9 +138,11 @@ pub fn render_image(
             bg_color: WHITE,
         },
     );
-    let (width, height) = (pixmap.width() as u32, pixmap.height() as u32);
+    let width = pixmap.width() as u32;
+    let height = (pixmap.height() as u32).min((crop_px * opts.zoom).round() as u32);
     // The background is opaque, so premultiplied and straight RGBA agree.
-    let rgba = pixmap.data_as_u8_slice();
+    // Rows are stored top to bottom, so cropping keeps a prefix.
+    let rgba = &pixmap.data_as_u8_slice()[..(width * height * 4) as usize];
 
     let mut bytes = Vec::new();
     match opts.format {
