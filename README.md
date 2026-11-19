@@ -254,11 +254,10 @@ network. → [docs/security.md](docs/security.md)
 Found by our own test suites; details and plans are in
 [docs/roadmap.md](docs/roadmap.md#known-issues).
 
-- **Multi-column layout is partial.** Paragraphs placed directly in the
-  multicol box flow across columns, in PDF and images. Content inside a
-  wrapper element is not split, and a paragraph after one that breaks across
-  columns starts a new column. `column-rule` colors must be hex, named,
-  `rgb()` or `hsl()`.
+- **Multi-column layout breaks only plain blocks.** Paragraphs and plain
+  wrappers (no padding, border, background) flow across columns. A box with a
+  border, padding or background stays whole in one column, and floats inside
+  the columns turn off splitting for that column set.
 - **Ligature text.** Words with fi/fl/ffl ligatures lose those letters in
   extracted text: `office` → `ofce`.
 - **No `Intl` in JavaScript.** `toLocaleUpperCase('tr-TR')`,

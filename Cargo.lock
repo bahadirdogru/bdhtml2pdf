@@ -1309,6 +1309,7 @@ dependencies = [
  "serde_json",
  "skrifa 0.47.0",
  "stylo",
+ "stylo_traits",
  "taffy",
  "thiserror 2.0.21",
  "unicode-properties",

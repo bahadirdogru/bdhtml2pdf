@@ -50,7 +50,7 @@
   tfoot td { font-weight: 700; border-top: 2px solid var(--line); }
 
   .columns {
-    columns: 3; column-gap: 26px; column-rule: 1px solid #dde0ea;
+    columns: 3; column-gap: 26px; column-rule: 1px solid var(--line);
     margin-top: 22px; text-align: justify; hyphens: auto;
   }
   .columns p { margin: 0 0 10px; }
@@ -91,7 +91,9 @@
 
   <section class="columns">
     <h3>Çok sütunlu düzen</h3>
-    <p>Bu bölüm CSS <code>columns: 3</code> ile dizildi: metin üç sütuna akar, aralarında bir çizgi vardır ve başlık <code>column-span: all</code> ile tüm sütunları kaplar. Aynı düzen PDF'te de, PNG ve JPEG görüntülerde de aynen görünür, çünkü görüntü PDF sayfasından üretilir. Yukarıdaki tablo, kartlar ve grafik sayfa yüklendikten sonra JavaScript ile oluşturuldu: bdhtml2pdf betikleri Boa ile çalıştırır, zamanlayıcıları sanal bir saatle boşaltır ve son DOM'u Firefox'un CSS motoru Stylo ile biçimler. Türkçe karakterler arama ve kopyalama için gerçek metin olarak kalır: Ç ç Ğ ğ I ı İ i Ö ö Ş ş Ü ü. Grafik vektördür; yazılar seçilebilir, fontlar yalnızca kullanılan harflerle gömülür.</p>
+    <p>Bu bölüm CSS <code>columns: 3</code> ile dizildi: metin üç sütuna akar, aralarında bir çizgi vardır ve başlık <code>column-span: all</code> ile tüm sütunları kaplar. Aynı düzen PDF'te de, PNG ve JPEG görüntülerde de aynen görünür, çünkü görüntü PDF sayfasından üretilir.</p>
+    <p>Yukarıdaki tablo, kartlar ve grafik sayfa yüklendikten sonra JavaScript ile oluşturuldu: bdhtml2pdf betikleri Boa ile çalıştırır, zamanlayıcıları sanal bir saatle boşaltır ve son DOM'u Firefox'un CSS motoru Stylo ile biçimler.</p>
+    <p>Türkçe karakterler arama ve kopyalama için gerçek metin olarak kalır: Ç ç Ğ ğ I ı İ i Ö ö Ş ş Ü ü. Grafik vektördür; yazılar seçilebilir, fontlar yalnızca kullanılan harflerle gömülür. Sütun çizgisinin rengi bile <code>color-mix()</code> ile tanımlı bir CSS değişkeninden gelir.</p>
   </section>
 
   <footer>
