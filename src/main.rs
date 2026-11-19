@@ -69,7 +69,8 @@ struct Cli {
     /// Image: height in pixels (0 = the whole page)
     #[arg(long, default_value_t = 0)]
     height: u32,
-    /// Image: zoom factor (2 = twice the pixels per CSS pixel)
+    /// Zoom factor. PDF: content scale (2 = twice as large, as in
+    /// wkhtmltopdf); image: device pixels per CSS pixel
     #[arg(long, default_value_t = 1.0)]
     zoom: f32,
     /// Image: JPEG quality, 1–100
@@ -105,6 +106,12 @@ struct Cli {
 }
 
 fn page_options(cli: &Cli) -> Result<PageOptions, String> {
+    // A PDF is laid out on a page `1 / zoom` times the paper: bound it so a
+    // tiny zoom cannot ask for a huge layout.
+    let zoom = cli.zoom;
+    if !(0.1..=10.0).contains(&zoom) {
+        return Err(format!("invalid zoom {zoom} (expected 0.1 to 10)"));
+    }
     let (mut width, mut height) = match (&cli.page_width, &cli.page_height) {
         (Some(w), Some(h)) => (length_pt(w)?, length_pt(h)?),
         _ => named_size(&cli.page_size).ok_or_else(|| {
@@ -130,12 +137,13 @@ fn page_options(cli: &Cli) -> Result<PageOptions, String> {
         margin_right: length_pt(&cli.margin_right)?,
         margin_bottom: length_pt(&cli.margin_bottom)?,
         margin_left: length_pt(&cli.margin_left)?,
-        scale: if cli.enable_smart_shrinking {
-            SMART_SHRINK_SCALE
-        } else {
-            1.0
-        },
-        shrink_to_fit: (!cli.disable_smart_shrinking).then_some(MIN_SHRINK_SCALE),
+        scale: zoom
+            * if cli.enable_smart_shrinking {
+                SMART_SHRINK_SCALE
+            } else {
+                1.0
+            },
+        shrink_to_fit: (!cli.disable_smart_shrinking).then_some(MIN_SHRINK_SCALE * zoom),
     })
 }
 

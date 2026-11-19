@@ -108,6 +108,8 @@ installed (`fonts-liberation`, `fonts-crosextra-carlito`,
 `fonts-crosextra-caladea` on Debian and Ubuntu; `liberation-fonts`,
 `google-carlito-fonts`, `google-caladea-fonts` on Fedora), as with
 fontconfig's metric aliases. Windows and macOS already have the originals.
+Text the page does not style is set in Arial, as in wkhtmltopdf, so it looks
+the same on all three systems (Liberation Sans on Linux).
 
 **Coming from wkhtmltopdf?** wkhtmltopdf prints everything at 80% by default
 ("smart shrinking"). Pass `--enable-smart-shrinking` to get the same sizes and
@@ -295,10 +297,11 @@ JavaScript). Anything else is PDF; `-f, --format pdf|png|jpg|html` overrides it.
 <tr><td><code>--title</code></td><td></td><td>PDF title</td></tr>
 <tr><td><code>--enable-smart-shrinking</code></td><td></td><td>print every page at 80%, as wkhtmltopdf does by default; for pages written for wkhtmltopdf</td></tr>
 <tr><td><code>--disable-smart-shrinking</code></td><td></td><td>never shrink; by default content wider than the page is scaled down to fit, to at most half size</td></tr>
+<tr><td><code>--zoom</code></td><td><code>1</code></td><td>content scale, 0.1–10, as in wkhtmltopdf (<code>2</code> = twice as large); multiplies smart shrinking</td></tr>
 <tr><th colspan="3" align="left">🖼️ Image (PNG, JPEG)</th></tr>
 <tr><td><code>--width</code></td><td><code>1024</code></td><td>viewport width in pixels</td></tr>
 <tr><td><code>--height</code></td><td><code>0</code></td><td>image height in pixels; <code>0</code> captures the whole page (up to 32 768 pixels)</td></tr>
-<tr><td><code>--zoom</code></td><td><code>1</code></td><td>device pixels per CSS pixel</td></tr>
+<tr><td><code>--zoom</code></td><td><code>1</code></td><td>device pixels per CSS pixel, 0.1–10</td></tr>
 <tr><td><code>--quality</code></td><td><code>94</code></td><td>JPEG quality, 1–100</td></tr>
 <tr><th colspan="3" align="left">⚙️ JavaScript</th></tr>
 <tr><td><code>-n, --disable-javascript</code></td><td></td><td>skip scripts</td></tr>

@@ -151,8 +151,42 @@ fn arial_uses_a_metric_compatible_font() {
     .unwrap();
     let out = dir.join("arial.pdf");
     convert(&input, &out);
-    let pdf = std::fs::read(&out).unwrap();
-    let names: Vec<String> = pdf
+    let names = embedded_fonts(&std::fs::read(&out).unwrap());
+    assert!(
+        names.iter().any(|n| is_arial(n)),
+        "embedded fonts: {names:?}"
+    );
+}
+
+#[test]
+fn unstyled_text_uses_arial() {
+    // As in wkhtmltopdf: text the page does not style is set in Arial (or
+    // its metric-compatible substitute on Linux), not the browsers' serif.
+    let dir = tempdir("default-font");
+    let input = dir.join("plain.html");
+    std::fs::write(
+        &input,
+        "<!DOCTYPE html><meta charset=utf-8><table border=1><tr><td>a<td>b</table>",
+    )
+    .unwrap();
+    let out = dir.join("plain.pdf");
+    convert(&input, &out);
+    let names = embedded_fonts(&std::fs::read(&out).unwrap());
+    assert!(
+        !names.is_empty() && names.iter().all(|n| is_arial(n)),
+        "embedded fonts: {names:?}"
+    );
+}
+
+fn is_arial(name: &str) -> bool {
+    ["LiberationSans", "Arimo", "Arial"]
+        .iter()
+        .any(|family| name.starts_with(family))
+}
+
+/// The base font names of the embedded (subset) fonts, without the subset tag.
+fn embedded_fonts(pdf: &[u8]) -> Vec<String> {
+    let mut names: Vec<String> = pdf
         .split(|&b| b == b'/')
         .filter_map(|word| {
             let word = word
@@ -162,12 +196,9 @@ fn arial_uses_a_metric_compatible_font() {
             Some(name.split_once('+')?.1.to_string())
         })
         .collect();
-    assert!(
-        names.iter().any(|n| n.starts_with("LiberationSans")
-            || n.starts_with("Arimo")
-            || n.starts_with("Arial")),
-        "embedded fonts: {names:?}"
-    );
+    names.sort();
+    names.dedup();
+    names
 }
 
 fn base64_encode(bytes: &[u8]) -> String {

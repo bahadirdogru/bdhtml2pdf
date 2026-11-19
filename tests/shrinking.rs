@@ -1,6 +1,7 @@
-//! `--enable-smart-shrinking` prints at 80% as wkhtmltopdf does, so pages
-//! written for wkhtmltopdf keep their page count; `--disable-smart-shrinking`
-//! conflicts with it.
+//! Scaling the printed page: `--enable-smart-shrinking` prints at 80% as
+//! wkhtmltopdf does, so pages written for wkhtmltopdf keep their page count;
+//! `--disable-smart-shrinking` conflicts with it; `--zoom` scales the PDF as
+//! in wkhtmltopdf.
 
 use std::process::{Command, Output};
 
@@ -50,4 +51,29 @@ fn smart_shrinking_flags_conflict() {
         "conflict",
     );
     assert_eq!(o.status.code(), Some(2));
+}
+
+/// `--zoom 2` lays the page out half as wide and tall and prints it twice as
+/// large: five 100 px boxes per page instead of ten. `--zoom 0.5` fits twenty.
+#[test]
+fn zoom_scales_the_pdf() {
+    let html = format!(
+        "<!DOCTYPE html><body style='margin:0'>{}</body>",
+        "<div style='height:100px'></div>".repeat(60)
+    );
+    let (o, large) = run(&["--zoom", "2"], &html, "zoom2");
+    assert!(o.status.success());
+    let (o, small) = run(&["--zoom", "0.5"], &html, "zoom05");
+    assert!(o.status.success());
+    assert_eq!((pages(&large), pages(&small)), (12, 3));
+}
+
+#[test]
+fn zoom_out_of_range_is_an_error() {
+    for zoom in ["0", "-1", "100", "NaN"] {
+        // `-1` is rejected by the argument parser (status 2), the others
+        // by the range check (status 1).
+        let (o, pdf) = run(&[&format!("--zoom={zoom}")], "<p>x</p>", "badzoom");
+        assert!(!o.status.success() && pdf.is_empty(), "--zoom {zoom}");
+    }
 }

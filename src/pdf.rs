@@ -7,6 +7,14 @@ use crate::PageOptions;
 /// CSS pixels per PDF point.
 const PT_TO_PX: f32 = 96.0 / 72.0;
 
+/// The font of text the page does not style: Arial, as in wkhtmltopdf
+/// (QtWebKit's standard font) rather than the browsers' serif. Windows and
+/// macOS ship Arial; on Linux fulgur maps it to a metric-compatible family
+/// (Liberation Sans, Arimo) when one is installed, so line breaks are the
+/// same on all three. `:where` gives the rule no specificity: any
+/// `font-family` the page sets on the root or below wins.
+const DEFAULT_FONT_CSS: &str = ":where(html) { font-family: Arial, sans-serif; }";
+
 fn engine(
     html: &str,
     base_dir: &Path,
@@ -26,7 +34,14 @@ fn engine(
             left: page.margin_left,
         })
         .base_path(base_dir)
-        .assets(crate::assets::collect_images(html, base_dir));
+        .assets({
+            // After the page's own stylesheets; order does not matter for a
+            // rule without specificity except against `*`, which styles
+            // every element directly anyway.
+            let mut assets = crate::assets::collect_images(html, base_dir);
+            assets.add_css(DEFAULT_FONT_CSS);
+            assets
+        });
     if let Some(t) = title {
         builder = builder.title(t);
     }
