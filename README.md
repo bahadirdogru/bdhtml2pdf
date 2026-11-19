@@ -284,8 +284,8 @@ Found by our own test suites; details and plans are in
   1 s, but parsing time grows with the square of the depth: 80 000 levels take
   about 27 s. With JavaScript on, `--javascript-timeout` bounds it.
 - **Build:** depends on patched sibling checkouts of fulgur and Blitz until the
-  fulgur port (fulgur-rs/fulgur#969) and the last Blitz pull request
-  (DioxusLabs/blitz#1665) are merged.
+  fulgur port (fulgur-rs/fulgur#969) and the open Blitz pull requests
+  (DioxusLabs/blitz#1665, #1681) are merged.
 
 ## Building
 
@@ -301,7 +301,7 @@ checkouts next to this repository, at the commits pinned in
 ../fulgur   github.com/bahadirdogru/fulgur, branch blitz-master  (fulgur-rs/fulgur#969)
 ../blitz    github.com/bahadirdogru/blitz,  branch public-layout-pass
             (Blitz b4ad543 plus DioxusLabs/blitz#1664, #1666, #1671 and
-            #1677, merged upstream, and #1665, in review)
+            #1677, merged upstream, and #1665 and #1681, in review)
 ```
 
 ```sh

@@ -29,7 +29,7 @@
 | Subgrid | `grid-template-columns: subgrid` falls back. | Taffy support upstream. |
 | Long documents are slower than the others. A 1000-row, 24-page invoice takes about 1 s. | Batch throughput on very long tables. | Profile pagination. Hand the DOM to fulgur directly instead of serializing and re-parsing it. |
 | fulgur GCPM snapshot shifts after the port | 3 byte-level snapshots break pages one paragraph earlier or later than before | Find the line-height or metrics change in Parley 0.13. Accept new snapshots only once it is understood. |
-| Builds need sibling checkouts of patched fulgur and Blitz | Not buildable from crates.io alone | Four of the five Blitz pull requests are merged; the serializer fix (DioxusLabs/blitz#1665) and the fulgur port (fulgur-rs/fulgur#969) are open. See [architecture.md](architecture.md#changes-to-upstream-projects). |
+| Builds need sibling checkouts of patched fulgur and Blitz | Not buildable from crates.io alone | Four of the six Blitz pull requests are merged; the serializer fix (DioxusLabs/blitz#1665), the table `border` attribute (#1681) and the fulgur port (fulgur-rs/fulgur#969) are open. See [architecture.md](architecture.md#changes-to-upstream-projects). |
 
 ## Roadmap
 
@@ -48,8 +48,9 @@
      `ScriptDocument::runtime_limits_mut` (#1671) and the `@import` abort
      fix (#1677).
    - Blitz serializer fix (#1665): review comments addressed, awaiting
-     re-review. Once it merges, build against Blitz `main` instead of the
-     `public-layout-pass` branch.
+     re-review. Blitz table `border` attribute (#1681): open. Once both
+     merge, build against Blitz `main` instead of the `public-layout-pass`
+     branch.
    - fulgur: the Blitz-master port and its fixes (fulgur-rs/fulgur#969,
      draft).
 3. **Direct DOM hand-off.** Pass the post-JavaScript DOM to fulgur without

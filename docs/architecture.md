@@ -98,6 +98,7 @@ upstream. Status as of 2026-11-19.
 | Blitz | Serializer: HTML elements are never written as `<x />` | `<i></i>` was serialized as `<i />`, which HTML parses as an *open* `<i>`. After a JavaScript round trip, the rest of the page became italic or was swallowed. A regression test is added. | DioxusLabs/blitz#1665, in review |
 | Blitz | Outside list markers keep `white-space: pre` (CSS Lists 3 UA style) | Parley 0.13 collapsed the trailing space of `"1. "`, so numbered markers touched the item text (`1.Author`). | DioxusLabs/blitz#1666, merged |
 | Blitz | An `@import` whose URL does not parse is refused | `@import url("http://[::1")` aborted the process (`unwrap()` on `None`). | DioxusLabs/blitz#1677, merged |
+| Blitz | A table's `border` attribute draws the table and cell borders | The UA stylesheet's table rules used Gecko's `:-moz-table-border-nonzero`, which Servo's selector parser drops, and the width was not mapped: `<table border="1">` drew nothing. | DioxusLabs/blitz#1681, open |
 | fulgur | Port to Blitz master / Stylo 0.24 / Parley 0.13 / Taffy git | New network-handler model, layout data only on element nodes, Stylo getter renames, Parley run indices, Taffy's new `LayoutOutput` fields. | fulgur-rs/fulgur#969, draft |
 | fulgur | Counter attributes in the null namespace, set through the DOM mutator | Blitz 0.3 matches attribute namespaces, so `counter()` / `counters()` in `::before` rendered empty. | #969 |
 | fulgur | A captioned table's percentage width moves to the caption wrapper | The `fit-content` caption wrapper made `width:100%` tables shrink to their content width under Blitz 0.3. | #969 |
@@ -112,6 +113,8 @@ upstream. Status as of 2026-11-19.
 | fulgur | Bare text between blocks in columns | Text mixed with blocks inside a multi-column container panicked. | #969 |
 | fulgur | Floats flow through columns | A float kept its whole wrapper in one column, and text did not wrap around top-level floats. | #969 |
 | fulgur | Boxes inside paragraphs | Floats in a line of text were drawn at their placeholder, and inline blocks and floats in paragraphs split across pages were not drawn. | #969 |
+| fulgur | Metric-compatible font aliases | Without Arial installed, `font-family: Arial` fell to the default font instead of Liberation Sans, so lines were wider and documents gained pages. | #969 |
+| fulgur | Borders in the collapsing border model | `border-collapse: collapse` tables drew no borders: Blitz lays them out as gutters and paints them in its own renderer. | #969 |
 
 ## Resource policy
 
