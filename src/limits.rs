@@ -51,12 +51,12 @@ fn release(bytes: usize) {
 #[cold]
 fn memory_limit_exceeded() -> ! {
     const MSG: &[u8] = b"error: memory limit exceeded (see --max-memory)\n";
-    #[cfg(unix)]
+    #[cfg(any(unix, windows))]
     unsafe {
-        libc::write(2, MSG.as_ptr().cast(), MSG.len());
+        libc::write(2, MSG.as_ptr().cast(), MSG.len() as _);
         libc::_exit(EXIT_MEMORY_LIMIT)
     }
-    #[cfg(not(unix))]
+    #[cfg(not(any(unix, windows)))]
     {
         let _ = MSG;
         std::process::abort()

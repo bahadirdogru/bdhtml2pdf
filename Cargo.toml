@@ -27,8 +27,9 @@ image = { version = "0.25", default-features = false, features = ["png", "jpeg"]
 style_config = { version = "0.24.0", package = "stylo_static_prefs" }
 clap = { version = "4", default-features = false, features = ["std", "derive", "help", "usage", "error-context"] }
 url = "2"
-# write(2) and _exit(2) from inside the global allocator (src/limits.rs).
-[target.'cfg(unix)'.dependencies]
+# write(2) and _exit(2) from inside the global allocator (src/limits.rs); on
+# Windows the C runtime's _write and _exit.
+[target.'cfg(any(unix, windows))'.dependencies]
 libc = "0.2"
 
 [profile.release]
