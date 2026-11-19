@@ -254,10 +254,10 @@ network. → [docs/security.md](docs/security.md)
 Found by our own test suites; details and plans are in
 [docs/roadmap.md](docs/roadmap.md#known-issues).
 
-- **Multi-column layout must fit on one page.** Within a page, paragraphs,
-  wrappers and bordered boxes flow across the columns. A multi-column block
-  taller than the page loses the content after the first page. Floats inside
-  the columns turn off splitting for that column set.
+- **Multi-column layout has gaps.** Text, wrappers and bordered boxes flow
+  across columns and pages. Bare text mixed with blocks inside the columns
+  does not break between lines, and floats inside the columns turn off
+  splitting for that column set.
 - **Ligature text.** Words with fi/fl/ffl ligatures lose those letters in
   extracted text: `office` → `ofce`.
 - **No `Intl` in JavaScript.** `toLocaleUpperCase('tr-TR')`,
