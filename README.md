@@ -6,8 +6,9 @@ successor to wkhtmltopdf.** No Chromium, no WebKit, no Qt.
 bdhtml2pdf takes the HTML your application already renders and runs its
 JavaScript (React, Vue, Preact, plain DOM code). It styles the page with
 Firefox's CSS engine, paginates it with print CSS, and writes a vector PDF with
-real, searchable text and subset fonts. All of this happens in one process
-of about 25 MB, written in Rust.
+real, searchable text and subset fonts. It can also write PNG or JPEG
+screenshots, like wkhtmltoimage. All of this happens in one process of about
+28 MB, written in Rust.
 
 > **Status: pre-release (0.1.0).** It works end to end and is measured below,
 > but it still builds against patched sibling checkouts of fulgur and Blitz
@@ -19,6 +20,8 @@ bdhtml2pdf invoice.html invoice.pdf
 bdhtml2pdf --page-size A4 --orientation Landscape --margin-top 15mm report.html report.pdf
 bdhtml2pdf --window-status ready --javascript-delay 2000 dashboard.html dashboard.pdf
 bdhtml2pdf app.html rendered-dom.html   # write the DOM after JavaScript instead of a PDF
+bdhtml2pdf --width 1280 page.html page.png          # image of the whole page
+bdhtml2pdf --height 630 --zoom 2 card.html card.jpg # fixed size, twice the pixels
 ```
 
 ## Why
@@ -73,6 +76,8 @@ HTML ─► html5ever ─► Blitz DOM ◄──► Boa JavaScript        (one D
                          │   pagination, table/multicol fragmentation
                          ▼
                      Krilla: vector PDF, subset fonts, text as text
+
+Image output: the same DOM ─► Blitz paint ─► vello_cpu ─► PNG / JPEG
 ```
 
 | Component | Role |
@@ -83,6 +88,7 @@ HTML ─► html5ever ─► Blitz DOM ◄──► Boa JavaScript        (one D
 | [Boa](https://github.com/boa-dev/boa) 0.22 | JavaScript engine, pure Rust |
 | [fulgur](https://github.com/fulgur-rs/fulgur) | paged media (GCPM), pagination, PDF layout (ported by us to current Blitz) |
 | [Krilla](https://github.com/LaurenzV/krilla) | PDF writer |
+| `blitz-paint` + [vello_cpu](https://github.com/linebender/vello) | image output: painting and CPU rasterization |
 
 All of it is Rust except the system fontconfig. → [docs/architecture.md](docs/architecture.md)
 covers the pipeline, all dependencies with versions and licenses, and the
@@ -110,7 +116,9 @@ copied from [docs/benchmarks/2026-11-19.md](docs/benchmarks/2026-11-19.md).
 | Typical one-page document | **0.07 s · 31 MB** | 0.02 s · 10 MB | 0.24 s · 35 MB | 0.36 s · 250 MB RSS (190 MB tree) |
 | React app with timers | **0.16 s · 48 MB** | — | — | 0.38 s · 249 MB |
 | 24-page invoice | 1.07 s · 60 MB | 0.08 s · 16 MB | 0.37 s · 47 MB | 0.71 s · 338 MB (tree) |
-| Install size | **25 MB**, one file | 13 MB | 39 MB | 432 MB |
+| Install size | **25 MB**, one file ¹ | 13 MB | 39 MB | 432 MB |
+
+¹ 28 MB since image output was added (2.4 MB for the PNG/JPEG painter).
 
 In short:
 
@@ -186,6 +194,8 @@ Found by our own test suites; details and plans are in [docs/roadmap.md](docs/ro
   in CSS works.
 - **Not supported yet:** container queries, subgrid, Canvas 2D (`<canvas>`
   charts), and the wkhtmltopdf header/footer flags.
+- **Images have no multi-column layout.** fulgur lays out `columns` for the
+  PDF; image output uses Blitz's own layout, which shows them as one column.
 - **Long tables are slower than they should be:** about 1 s for 24 pages.
 - **Build:** depends on patched sibling checkouts of fulgur and Blitz until the
   upstream pull requests are merged.
@@ -194,12 +204,17 @@ Found by our own test suites; details and plans are in [docs/roadmap.md](docs/ro
 
 | Option | Default | Meaning |
 |---|---|---|
-| `input` `output` | | Files, or `-` for stdin/stdout. An output ending in `.html` writes the post-JavaScript DOM. |
+| `input` `output` | | Files, or `-` for stdin/stdout. The output extension picks the format: `.pdf`, `.png`, `.jpg`/`.jpeg`, or `.html` (the post-JavaScript DOM). Anything else is PDF. |
+| `-f, --format` | | `pdf`, `png`, `jpg` or `html`, overriding the extension |
 | `-s, --page-size` | `A4` | A3, A4, A5, B4, B5, Letter, Legal, Ledger |
 | `-O, --orientation` | `Portrait` | `Portrait` or `Landscape` |
 | `--page-width`, `--page-height` | | custom size, e.g. `210mm` |
 | `-T/-B/-L/-R, --margin-*` | `10mm` | `mm`, `cm`, `in`, `pt`, `px` |
 | `--title` | | PDF title |
+| `--width` | `1024` | image: viewport width in pixels |
+| `--height` | `0` | image: height in pixels; `0` captures the whole page (up to 32 768 pixels) |
+| `--zoom` | `1` | image: device pixels per CSS pixel |
+| `--quality` | `94` | image: JPEG quality, 1–100 |
 | `-n, --disable-javascript` | | skip scripts |
 | `--javascript-delay` | `200` | virtual milliseconds of timers to run after load |
 | `--window-status` | | wait until `window.status` equals this value |

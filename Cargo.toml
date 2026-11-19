@@ -18,6 +18,13 @@ blitz-vibey-script = { git = "https://github.com/DioxusLabs/blitz", rev = "b4ad5
 # blitz-master). One Stylo (0.24): the same engine as the DOM that JS uses.
 fulgur = { path = "../fulgur/crates/fulgur" }
 
+# Image output: Blitz's painter, rasterized on the CPU, encoded by `image`.
+blitz-paint = { git = "https://github.com/DioxusLabs/blitz", rev = "b4ad543def00146850352c3da5dbc027f9053015", default-features = false, features = ["svg"] }
+anyrender = "0.15"
+anyrender_vello_cpu = { version = "0.19", default-features = false }
+peniko = "0.6"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+
 # Stylo runtime prefs: Blitz leaves `:has()`, `:nth-child(of S)` and container
 # queries switched off; bdhtml2pdf turns them on (see src/prefs.rs).
 style_config = { version = "0.24.0", package = "stylo_static_prefs" }
@@ -39,5 +46,6 @@ strip = true
 [patch."https://github.com/DioxusLabs/blitz"]
 blitz-dom = { path = "../blitz/packages/blitz-dom" }
 blitz-html = { path = "../blitz/packages/blitz-html" }
+blitz-paint = { path = "../blitz/packages/blitz-paint" }
 blitz-traits = { path = "../blitz/packages/blitz-traits" }
 blitz-vibey-script = { path = "../blitz/packages/blitz-vibey-script" }

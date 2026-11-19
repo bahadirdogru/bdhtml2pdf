@@ -152,6 +152,7 @@ See [security.md](security.md).
 |---|---|---|
 | `src/page.rs` | page size and length parsing | `cargo test --release` |
 | `tests/js_limits.rs` | loop limit (also through `try`/`catch`), timer flood, watchdog exit 3, memory limit exit 4, and heavy finite scripts unaffected | `cargo test --release --test js_limits` |
+| `tests/image_output.rs` | PNG size and whole-page capture, `--height` and `--zoom`, JPEG by extension and `--format`, JavaScript changes and viewport visible in the image, local images load and files outside the input directory do not | `cargo test --release --test image_output` |
 | `tests/deep_nesting.rs` | flattening keeps text and order, shallow pages are untouched, 20 000 levels render with and without JavaScript | `cargo test --release --test deep_nesting` |
 | fulgur-blitz (`../fulgur`) | 2109 unit tests of the Blitz adapter, GCPM, pagination and conversion | `cargo test -p fulgur-blitz --lib` |
 | fulgur integration | byte-level PDF snapshots and integration suites | `cargo test -p fulgur --no-fail-fast` |

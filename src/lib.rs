@@ -5,12 +5,14 @@
 
 pub mod depth;
 pub mod fetch;
+pub mod image;
 pub mod lifecycle;
 pub mod limits;
 pub mod page;
 pub mod pdf;
 pub mod prefs;
 
+pub use image::{ImageFormat, ImageOptions, render_image};
 pub use lifecycle::{JsOptions, JsResult, JsTimeout, run_scripts, run_scripts_bounded};
 pub use page::PageOptions;
 pub use pdf::render_pdf;

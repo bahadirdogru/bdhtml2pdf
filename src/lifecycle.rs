@@ -41,6 +41,8 @@ pub struct JsOptions {
     pub debug: bool,
     /// Maximum loop iterations in one JavaScript function call. `None` is unlimited.
     pub loop_limit: Option<u64>,
+    /// Viewport in CSS pixels for layout queries from JavaScript.
+    pub viewport: (u32, u32),
 }
 
 impl Default for JsOptions {
@@ -51,6 +53,7 @@ impl Default for JsOptions {
             timeout: Duration::from_secs(30),
             debug: false,
             loop_limit: Some(DEFAULT_LOOP_LIMIT),
+            viewport: A4_VIEWPORT,
         }
     }
 }
@@ -121,9 +124,8 @@ pub fn run_scripts_bounded(
     }
 }
 
-/// Viewport used for JS layout queries (A4 width at 96 dpi).
-const VIEWPORT_WIDTH: u32 = 794;
-const VIEWPORT_HEIGHT: u32 = 1123;
+/// Default [`JsOptions::viewport`]: an A4 page at 96 dpi.
+pub const A4_VIEWPORT: (u32, u32) = (794, 1123);
 
 pub fn run_scripts(html: &str, base_dir: &Path, opts: &JsOptions) -> std::io::Result<JsResult> {
     let base_url = Url::from_directory_path(base_dir.canonicalize()?)
@@ -132,8 +134,8 @@ pub fn run_scripts(html: &str, base_dir: &Path, opts: &JsOptions) -> std::io::Re
     let config = DocumentConfig {
         base_url: Some(base_url.to_string()),
         viewport: Some(blitz_traits::shell::Viewport::new(
-            VIEWPORT_WIDTH,
-            VIEWPORT_HEIGHT,
+            opts.viewport.0,
+            opts.viewport.1,
             1.0,
             blitz_traits::shell::ColorScheme::Light,
         )),

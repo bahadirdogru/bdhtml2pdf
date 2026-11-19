@@ -39,11 +39,12 @@ directly is on the [roadmap](roadmap.md).
 
 | File | Role |
 |---|---|
-| `src/main.rs` | wkhtmltopdf-compatible CLI: `input output`, `--page-size`, `--orientation`, `--page-width/height`, `--margin-*`, `--title`, `--disable-javascript`, `--javascript-delay`, `--window-status`, `--javascript-timeout`, `--javascript-loop-limit`, `--max-memory`, `--debug-javascript`, `-q`. An output name ending in `.html` writes the post-JavaScript DOM instead of a PDF. |
+| `src/main.rs` | wkhtmltopdf- and wkhtmltoimage-compatible CLI: `input output`, `--format`, `--width`, `--height`, `--zoom`, `--quality`, `--page-size`, `--orientation`, `--page-width/height`, `--margin-*`, `--title`, `--disable-javascript`, `--javascript-delay`, `--window-status`, `--javascript-timeout`, `--javascript-loop-limit`, `--max-memory`, `--debug-javascript`, `-q`. The output extension picks PDF, PNG, JPEG or the post-JavaScript DOM (`.html`). |
 | `src/lifecycle.rs` | Render lifecycle on `ScriptDocument`: no timer thread, **virtual time**. A `setTimeout(fn, 5000)` costs no real waiting, and the result does not depend on machine speed. Also sets the loop limit, clamps nested zero-delay timers as browsers do, and runs JavaScript on a worker thread under a wall-clock watchdog. |
 | `src/depth.rs` | Flattens the DOM below 500 nesting levels (as Blink and WebKit do), and runs work on a thread with a 256 MiB stack. |
 | `src/limits.rs` | Counting global allocator: ends the process with exit status 4 above `--max-memory`. |
 | `src/fetch.rs` | Script loader sandbox: `data:` URLs and `file:` URLs **inside the input directory** only. Paths are canonicalized first, so `..` and symlinks cannot escape. No network. |
+| `src/image.rs` | PNG/JPEG output: lays the DOM out at `--width` with `screen` media, loads local resources through fulgur's sandboxed loader, paints with `blitz-paint` on `vello_cpu`, encodes with `image`. Pages taller than 32 768 pixels are cut off with a warning. |
 | `src/pdf.rs` | Calls fulgur with page size, margins, title and a base path that confines `<link>`, `<img>` and `@import` to the input directory. |
 | `src/page.rs` | Page sizes (A3–A5, B4, B5, Letter, Legal, Ledger) and length parsing (`mm`, `cm`, `in`, `pt`, `px`). |
 | `src/prefs.rs` | Turns on Stylo features that Blitz leaves off: `:has()`, `:nth-child(… of S)`, container queries. |
@@ -66,10 +67,11 @@ used to find installed fonts.
 | JS ↔ DOM binding | blitz-vibey-script | master | DioxusLabs/blitz | MIT/Apache-2.0 |
 | Pagination, GCPM, PDF layout | fulgur | 0.41 (`blitz-master` port) | fulgur-rs | MIT/Apache-2.0 |
 | PDF writer | krilla, krilla-svg | 0.7 | LaurenzV | MIT/Apache-2.0 |
+| Image output | blitz-paint, anyrender 0.15, vello_cpu 0.4, image 0.25 | | DioxusLabs, linebender, image-rs | MIT/Apache-2.0 |
 | SVG | usvg / resvg | 0.45 (PDF), 0.50 (DOM) | linebender | Apache-2.0/MIT |
 | CLI | clap | 4 | | MIT/Apache-2.0 |
 
-`Cargo.lock` pins 435 crates. Release builds use `lto = "fat"`,
+`Cargo.lock` pins 446 crates. Release builds use `lto = "fat"`,
 `codegen-units = 1`, `panic = "abort"` and `strip = true`.
 
 ### Why one Stylo matters

@@ -1,4 +1,4 @@
-//! wkhtmltopdf-compatible command line.
+//! wkhtmltopdf- and wkhtmltoimage-compatible command line.
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -7,19 +7,27 @@ use std::time::Duration;
 use bdhtml2pdf::depth::with_large_stack;
 use bdhtml2pdf::limits::{EXIT_JS_TIMEOUT, LimitedAlloc, set_memory_limit};
 use bdhtml2pdf::page::{NAMED_SIZES, length_pt, named_size};
-use bdhtml2pdf::{JsOptions, JsTimeout, PageOptions};
+use bdhtml2pdf::{ImageFormat, ImageOptions, JsOptions, JsTimeout, PageOptions};
 use clap::Parser;
 
 #[global_allocator]
 static ALLOC: LimitedAlloc = LimitedAlloc;
 
 #[derive(Parser)]
-#[command(name = "bdhtml2pdf", version, about = "HTML + JavaScript to PDF")]
+#[command(
+    name = "bdhtml2pdf",
+    version,
+    about = "HTML + JavaScript to PDF or image"
+)]
 struct Cli {
     /// Input HTML file ("-" for stdin)
     input: String,
-    /// Output PDF ("-" for stdout). A `.html` output writes the DOM after JavaScript ran instead.
+    /// Output file ("-" for stdout). The extension picks the format: .pdf,
+    /// .png, .jpg/.jpeg, or .html (the DOM after JavaScript ran).
     output: String,
+    /// Output format, overriding the extension: pdf, png, jpg, html
+    #[arg(short = 'f', long)]
+    format: Option<String>,
 
     /// Page size: A3, A4, A5, B4, B5, Letter, Legal, Ledger
     #[arg(short = 's', long, default_value = "A4")]
@@ -46,6 +54,19 @@ struct Cli {
     /// PDF title
     #[arg(long)]
     title: Option<String>,
+
+    /// Image: viewport width in pixels
+    #[arg(long, default_value_t = 1024)]
+    width: u32,
+    /// Image: height in pixels (0 = the whole page)
+    #[arg(long, default_value_t = 0)]
+    height: u32,
+    /// Image: zoom factor (2 = twice the pixels per CSS pixel)
+    #[arg(long, default_value_t = 1.0)]
+    zoom: f32,
+    /// Image: JPEG quality, 1–100
+    #[arg(long, default_value_t = 94, value_parser = clap::value_parser!(u8).range(1..=100))]
+    quality: u8,
 
     /// Do not run JavaScript
     #[arg(short = 'n', long)]
@@ -104,6 +125,34 @@ fn page_options(cli: &Cli) -> Result<PageOptions, String> {
     })
 }
 
+enum Output {
+    Pdf,
+    Html,
+    Image(ImageFormat),
+}
+
+fn output_format(cli: &Cli) -> Result<Output, String> {
+    let name = match &cli.format {
+        Some(f) => f.to_ascii_lowercase(),
+        None => Path::new(&cli.output)
+            .extension()
+            .map(|e| e.to_string_lossy().to_ascii_lowercase())
+            .unwrap_or_default(),
+    };
+    Ok(match name.as_str() {
+        "png" => Output::Image(ImageFormat::Png),
+        "jpg" | "jpeg" => Output::Image(ImageFormat::Jpeg),
+        "html" | "htm" => Output::Html,
+        "pdf" => Output::Pdf,
+        _ if cli.format.is_none() => Output::Pdf,
+        f => {
+            return Err(format!(
+                "unknown format {f:?} (expected pdf, png, jpg or html)"
+            ));
+        }
+    })
+}
+
 fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     set_memory_limit(match cli.max_memory {
         0 => None,
@@ -111,6 +160,17 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     });
     bdhtml2pdf::prefs::init();
     let page = page_options(&cli)?;
+    let output = output_format(&cli)?;
+    let image = ImageOptions {
+        width: cli.width,
+        height: (cli.height > 0).then_some(cli.height),
+        zoom: cli.zoom,
+        format: match output {
+            Output::Image(f) => f,
+            _ => ImageFormat::Png,
+        },
+        quality: cli.quality,
+    };
 
     let (html, base_dir) = if cli.input == "-" {
         let mut s = String::new();
@@ -136,6 +196,15 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
             timeout: Duration::from_secs(cli.javascript_timeout),
             debug: cli.debug_javascript,
             loop_limit: (cli.javascript_loop_limit > 0).then_some(cli.javascript_loop_limit),
+            viewport: match output {
+                Output::Image(_) => (
+                    image.width,
+                    image
+                        .height
+                        .unwrap_or(bdhtml2pdf::image::DEFAULT_VIEWPORT_HEIGHT),
+                ),
+                _ => bdhtml2pdf::lifecycle::A4_VIEWPORT,
+            },
         };
         let res = bdhtml2pdf::run_scripts_bounded(html, base_dir.clone(), js)??;
         if !cli.quiet {
@@ -152,13 +221,21 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
         res.html
     };
 
-    // A `.html` output writes the DOM after JavaScript; anything else is PDF.
-    let out = if cli.output.to_ascii_lowercase().ends_with(".html") {
-        dom_html.into_bytes()
-    } else {
-        with_large_stack(|| {
+    let out = match output {
+        Output::Html => dom_html.into_bytes(),
+        Output::Pdf => with_large_stack(|| {
             bdhtml2pdf::render_pdf(&dom_html, &base_dir, &page, cli.title.as_deref())
-        })?
+        })?,
+        Output::Image(_) => {
+            let img = with_large_stack(|| bdhtml2pdf::render_image(&dom_html, &base_dir, &image))?;
+            if img.truncated && !cli.quiet {
+                eprintln!(
+                    "warning: the page was cut off at {} pixels (use --height or a smaller --zoom)",
+                    img.height
+                );
+            }
+            img.bytes
+        }
     };
     if cli.output == "-" {
         std::io::Write::write_all(&mut std::io::stdout(), &out)?;
