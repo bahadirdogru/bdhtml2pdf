@@ -116,6 +116,7 @@ upstream. Status as of 2026-11-19.
 | fulgur | Metric-compatible font aliases | Without Arial installed, `font-family: Arial` fell to the default font instead of Liberation Sans, so lines were wider and documents gained pages. | #969 |
 | fulgur | Borders in the collapsing border model | `border-collapse: collapse` tables drew no borders: Blitz lays them out as gutters and paints them in its own renderer. | #969 |
 | fulgur | Content scale and shrink-to-fit | Content wider than the page ran off the paper; wkhtmltopdf's smart shrinking (everything at 80%) had no counterpart. | #969 |
+| fulgur | Absolutely positioned boxes placed against their parent | Blitz master positions them relative to their containing block; an absolute box in a table cell landed off the page and shrank the document, and one in an otherwise empty `<div>` was not drawn. | #969 |
 
 ## Resource policy
 
