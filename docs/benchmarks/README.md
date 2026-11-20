@@ -7,7 +7,7 @@ copied in from elsewhere or rounded in our favour.
 
 | Results | bdhtml2pdf | Date |
 |---|---|---|
-| [2026-11-20.md](2026-11-20.md) | 0.1.0 (pre-release), bdhtml2pdf only: size and memory work | 2026-11-20 |
+| [2026-11-20.md](2026-11-20.md) | 0.1.0 (pre-release), bdhtml2pdf only: size, memory and long tables | 2026-11-20 |
 | [2026-11-19.md](2026-11-19.md) | 0.1.0 (pre-release, Blitz master `b4ad543`) | 2026-11-19 |
 
 ## What is compared

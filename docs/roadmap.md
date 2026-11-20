@@ -27,7 +27,7 @@
 | SVG presentation attributes with `oklch()`, `color-mix()` and other CSS Color 4 values draw black. usvg parses SVG colors itself and knows only CSS Color 3. | Inline SVG charts and icons that reuse modern CSS colors lose them. | Resolve such attribute colors with Stylo before handing the SVG to usvg, or extend usvg's color parser upstream. |
 | Container queries | `@container` rules never match. | Blitz/Stylo integration: supply container sizes to Stylo during layout. |
 | Subgrid | `grid-template-columns: subgrid` falls back. | Taffy support upstream. |
-| Long documents are slower than the others. A 1000-row, 24-page invoice takes about 1 s. | Batch throughput on very long tables. | Profile pagination. Hand the DOM to fulgur directly instead of serializing and re-parsing it. |
+| Long tables are slower than sghtmltopdf: a 1000-row, 24-page invoice takes 0.17 s (0.08 s). | Batch throughput on very long tables. | Profile again. Hand the DOM to fulgur directly instead of serializing and re-parsing it. |
 | fulgur GCPM snapshot shifts after the port | 3 byte-level snapshots break pages one paragraph earlier or later than before | Find the line-height or metrics change in Parley 0.13. Accept new snapshots only once it is understood. |
 | Builds need sibling checkouts of patched fulgur and Blitz | Not buildable from crates.io alone | Four of the six Blitz pull requests are merged; the serializer fix (DioxusLabs/blitz#1665), the table `border` attribute (#1681) and the fulgur port (fulgur-rs/fulgur#969) are open. See [architecture.md](architecture.md#changes-to-upstream-projects). |
 
