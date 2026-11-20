@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ticket RW-26-0917</title>
+<!--
+  A sample for https://bdhtml2pdf.bahadirdogru.com. The QR codes are drawn by
+  qrcode.js (MIT, davidshimjs; see qrcode.LICENSE). Without a canvas it builds
+  each code as a table with one cell per module, which stays sharp vector
+  graphics in the PDF and scans. Regenerate with scripts/site.sh.
+  All names, dates and codes are invented.
+-->
+<script src="qrcode.min.js"></script>
+<style>
+  :root {
+    --ink: oklch(23% 0.03 270);
+    --muted: oklch(50% 0.03 270);
+    --accent: oklch(55% 0.19 285);
+    --accent-2: oklch(68% 0.16 25);
+    --line: oklch(90% 0.01 270);
+    --soft: oklch(97% 0.01 285);
+  }
+  @page {
+    size: A4;
+    margin: 16mm 16mm 18mm;
+    @bottom-center { content: "Rustwave Conference 2026 · Ticket RW-26-0917 · Page " counter(page) " of " counter(pages); font: 8pt sans-serif; color: #8a8f99; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 10pt/1.45 "Noto Sans", sans-serif; color: var(--ink); }
+  h1, h2, h3 { margin: 0; }
+
+  .ticket { display: grid; grid-template-columns: 1fr 62mm; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); break-inside: avoid; }
+  .main { padding: 18px 22px 20px; background: linear-gradient(135deg, var(--accent), color-mix(in oklch, var(--accent) 55%, var(--accent-2))); color: white; }
+  .main .kicker { font-size: 8pt; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
+  .main h1 { font-size: 24pt; line-height: 1.1; margin: 4px 0 2px; letter-spacing: -.01em; }
+  .main .sub { opacity: .9; }
+  .facts { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 12px 28px; margin-top: 18px; }
+  .facts dt { font-size: 7.5pt; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+  .facts dd { margin: 1px 0 0; font-weight: 700; font-size: 11pt; }
+  .holder { margin-top: 18px; padding-top: 12px; border-top: 1px dashed color-mix(in oklch, white 55%, transparent); display: flex; justify-content: space-between; align-items: end; }
+  .holder b { font-size: 13pt; display: block; }
+  .badge { padding: 4px 10px; border-radius: 999px; background: white; color: var(--accent); font-weight: 700; font-size: 8.5pt; letter-spacing: .08em; }
+
+  .stub { padding: 16px; background: white; border-left: 2px dashed var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; }
+  .stub small { color: var(--muted); font-size: 7.5pt; letter-spacing: .08em; text-transform: uppercase; }
+  .stub code { font: 700 10pt monospace; letter-spacing: .06em; }
+
+  section { margin-top: 22px; break-inside: avoid; }
+  section h2 { font-size: 8pt; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  table.agenda { width: 100%; border-collapse: collapse; }
+  .agenda td { padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .agenda td:first-child { width: 22mm; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+  .agenda td:last-child { width: 30mm; text-align: right; color: var(--muted); }
+  .agenda small { display: block; color: var(--muted); }
+
+  .passes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .pass { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: var(--soft); display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; }
+  .pass b { display: block; }
+  .pass span { color: var(--muted); font-size: 8.5pt; }
+  .note { color: var(--muted); font-size: 8.5pt; margin-top: 18px; }
+  .note b { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<article class="ticket">
+  <div class="main">
+    <div class="kicker">Admission ticket · Two days</div>
+    <h1>Rustwave Conference 2026</h1>
+    <div class="sub">Systems, the web and everything in between</div>
+    <dl class="facts" id="facts"></dl>
+    <div class="holder">
+      <div><span>Ticket holder</span><b>Deniz Aydın</b></div>
+      <span class="badge">SPEAKER</span>
+    </div>
+  </div>
+  <div class="stub">
+    <small>Scan at the entrance</small>
+    <div id="entry"></div>
+    <code>RW-26-0917</code>
+  </div>
+</article>
+
+<section>
+  <h2>Your agenda</h2>
+  <table class="agenda"><tbody id="agenda"></tbody></table>
+</section>
+
+<section>
+  <h2>Passes on this ticket</h2>
+  <div class="passes" id="passes"></div>
+</section>
+
+<p class="note"><b>Printed from HTML.</b> The QR codes on this page are drawn by a JavaScript library. With no canvas available, it builds every code as an HTML table with one cell per module. bdhtml2pdf writes those cells as vector rectangles, so the codes stay sharp at any zoom and scan from screen or paper.</p>
+
+<script>
+  const ticket = "RW-26-0917";
+  const facts = [
+    ["Date", "12–13 Dec 2026"],
+    ["Doors", "08:30"],
+    ["Venue", "Haliç Congress Center"],
+    ["City", "İstanbul"],
+    ["Hall", "B · Golden Horn"],
+    ["Seat", "Row 4 · 17"],
+  ];
+  document.getElementById("facts").innerHTML = facts
+    .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+
+  const agenda = [
+    ["Sat 09:30", "Opening keynote", "The next ten years of systems programming", "Hall A"],
+    ["Sat 11:00", "Rendering HTML without a browser", "Your talk · 40 minutes", "Hall B"],
+    ["Sat 14:00", "Workshop: async Rust in practice", "Bring a laptop", "Room 3"],
+    ["Sun 10:00", "Memory-safe parsers at scale", "Panel with Q&A", "Hall A"],
+    ["Sun 16:30", "Closing and lightning talks", "", "Hall A"],
+  ];
+  document.getElementById("agenda").innerHTML = agenda
+    .map(([t, title, sub, room]) =>
+      `<tr><td>${t}</td><td><b>${title}</b>${sub ? `<small>${sub}</small>` : ""}</td><td>${room}</td></tr>`)
+    .join("");
+
+  const passes = [
+    ["Speaker lounge", "Both days", "LOUNGE"],
+    ["Workshop seat", "Sat 14:00 · Room 3", "WS-03"],
+    ["Conference dinner", "Sat 19:30", "DINNER"],
+  ];
+  document.getElementById("passes").innerHTML = passes
+    .map(([name, when], i) =>
+      `<div class="pass"><div id="pass-${i}"></div><div><b>${name}</b><span>${when}</span></div></div>`)
+    .join("");
+
+  const qr = (id, text, size) => new QRCode(document.getElementById(id), {
+    text, width: size, height: size, correctLevel: QRCode.CorrectLevel.M,
+  });
+  qr("entry", `https://tickets.example/rw26/${ticket}`, 150);
+  passes.forEach(([, , code], i) => qr(`pass-${i}`, `${ticket}:${code}`, 64));
+</script>
+</body>
+</html>

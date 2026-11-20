@@ -139,3 +139,23 @@ fn table_qr_code_scans_at_low_resolution() {
 fn larger_table_qr_code_scans() {
     assert_scans("large", 200, &["--enable-smart-shrinking"], 300.0 / 72.0);
 }
+
+/// The ticket on the website: an entrance code and three small pass codes
+/// (64 px for 25 modules, so cells of fractional pixels), scanned at 300 dpi.
+#[test]
+fn website_ticket_sample_scans() {
+    let input = Path::new(env!("CARGO_MANIFEST_DIR")).join("docs/samples/ticket.html");
+    let output = tempdir("ticket").join("ticket.pdf");
+    convert(&input, &output, &[]);
+    let mut codes = decode_qr_codes(std::fs::read(&output).unwrap(), 300.0 / 72.0);
+    codes.sort();
+    assert_eq!(
+        codes,
+        [
+            "RW-26-0917:DINNER",
+            "RW-26-0917:LOUNGE",
+            "RW-26-0917:WS-03",
+            "https://tickets.example/rw26/RW-26-0917",
+        ]
+    );
+}

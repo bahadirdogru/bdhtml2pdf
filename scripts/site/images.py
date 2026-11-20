@@ -31,7 +31,7 @@ save(width(hero, 800), "showcase-800")
 save(width(hero, 1400), "showcase-1400", webp_only=True)
 
 # Sample previews: the top of a portrait page, or a whole landscape page.
-for name in ["report", "invoice", "newsletter", "certificate"]:
+for name in ["report", "invoice", "newsletter", "ticket", "certificate"]:
     page = width(Image.open(os.path.join(previews, name + ".png")).convert("RGB"), 600)
     if page.height > page.width:
         page = page.crop((0, 0, 600, 780))

@@ -20,12 +20,13 @@ trap 'rm -rf "$tmp"' EXIT
 # and margins come from the command line, as in wkhtmltopdf.
 "$B" -q docs/samples/invoice.html docs/samples/invoice.pdf
 "$B" -q docs/samples/newsletter.html docs/samples/newsletter.pdf
+"$B" -q docs/samples/ticket.html docs/samples/ticket.pdf
 "$B" -q -O Landscape -T 0mm -B 0mm -L 0mm -R 0mm docs/samples/certificate.html docs/samples/certificate.pdf
 "$B" -q --page-size A4 docs/showcase/showcase.html docs/showcase/showcase.pdf
 "$B" -q --width 960 --zoom 2 docs/showcase/showcase.html docs/showcase/showcase.png
 
 # Previews of the first page of each PDF.
-for s in invoice newsletter certificate; do
+for s in invoice newsletter ticket certificate; do
   pdftoppm -f 1 -l 1 -r 110 -png -singlefile "docs/samples/$s.pdf" "$tmp/$s"
 done
 pdftoppm -f 1 -l 1 -r 110 -png -singlefile docs/showcase/showcase.pdf "$tmp/report"
