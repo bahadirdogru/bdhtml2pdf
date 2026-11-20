@@ -34,7 +34,7 @@
   "url": "https://bdhtml2pdf.bahadirdogru.com/",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux",
-  "softwareVersion": "0.1.0",
+  "softwareVersion": "0.1.1",
   "license": "https://www.gnu.org/licenses/gpl-3.0.html",
   "codeRepository": "https://github.com/bahadirdogru/bdhtml2pdf",
   "programmingLanguage": "Rust",
@@ -89,7 +89,7 @@
     </figure>
   </div>
   <div class="wrap notice">
-    <p><strong>Pre-release 0.1.0.</strong> It works end to end and every number on this page is measured, but it still builds against patched checkouts of fulgur and Blitz until our upstream pull requests are merged. See the <a href="#status">known issues</a>.</p>
+    <p><strong>Pre-release 0.1.1.</strong> It works end to end and every number on this page is measured, but it still builds against patched checkouts of fulgur and Blitz until our upstream pull requests are merged. See the <a href="#status">known issues</a>.</p>
   </div>
 </section>
 
@@ -253,7 +253,7 @@
       <table>
         <caption>Correctness and speed</caption>
         <thead>
-          <tr><th scope="col">Check</th><th scope="col">bdhtml2pdf 0.1.0</th><th scope="col">sghtmltopdf 0.8.0</th><th scope="col">wkhtmltopdf 0.12.6</th><th scope="col">Chromium 157</th></tr>
+          <tr><th scope="col">Check</th><th scope="col">bdhtml2pdf 0.1.1</th><th scope="col">sghtmltopdf 0.8.0</th><th scope="col">wkhtmltopdf 0.12.6</th><th scope="col">Chromium 157</th></tr>
         </thead>
         <tbody>
           <tr><th scope="row">Modern CSS (11)</th><td class="us">10</td><td>8</td><td>1</td><td>11</td></tr>
@@ -331,7 +331,7 @@
         <div>
           <h3>Download</h3>
           <p>Linux, with <code>aarch64-unknown-linux-gnu</code> on ARM. On macOS use <code>aarch64-apple-darwin</code> and <code>shasum -a 256 -c</code>; the binary is not signed, so a copy downloaded with a browser needs <code>xattr -d com.apple.quarantine bdhtml2pdf</code> once.</p>
-<pre class="code"><code>VERSION=0.1.0
+<pre class="code"><code>VERSION=0.1.1
 TARGET=x86_64-unknown-linux-gnu
 NAME=bdhtml2pdf-$VERSION-$TARGET
 URL=https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$VERSION
@@ -341,7 +341,7 @@ sha256sum -c $NAME.tar.gz.sha256
 tar xzf $NAME.tar.gz
 sudo install $NAME/bdhtml2pdf /usr/local/bin/</code></pre>
           <p>Windows, in PowerShell:</p>
-<pre class="code"><code>$Version = "0.1.0"
+<pre class="code"><code>$Version = "0.1.1"
 $Name = "bdhtml2pdf-$Version-x86_64-pc-windows-msvc"
 Invoke-WebRequest "https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$Version/$Name.zip" -OutFile "$Name.zip"
 (Get-FileHash "$Name.zip" -Algorithm SHA256).Hash  <span class="c"># compare with $Name.zip.sha256</span>

@@ -8,7 +8,7 @@ A modern successor to wkhtmltopdf. No Chromium, no WebKit, no Qt.
 [![CI](https://github.com/bahadirdogru/bdhtml2pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/bahadirdogru/bdhtml2pdf/actions/workflows/ci.yml)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 [![Rust 1.92+](https://img.shields.io/badge/rust-1.92%2B-orange)](#building)
-[![Status: pre-release](https://img.shields.io/badge/status-pre--release%200.1.0-yellow)](#known-issues)
+[![Status: pre-release](https://img.shields.io/badge/status-pre--release%200.1.1-yellow)](#known-issues)
 [![Security suite: 16/16](https://img.shields.io/badge/security%20suite-16%2F16-brightgreen)](docs/security.md)
 
 [Website](https://bdhtml2pdf.bahadirdogru.com) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Results](#results) · [Command line](#command-line) · [Docs](#documentation)
@@ -41,7 +41,7 @@ one process of about 22 MB, written in Rust.
 | 🖼️ **Images too** | PNG and JPEG from the PDF layout, so multi-column text and pagination look the same |
 
 > [!NOTE]
-> **Pre-release (0.1.0).** It works end to end and every claim below is
+> **Pre-release (0.1.1).** It works end to end and every claim below is
 > measured, but it still builds against patched sibling checkouts of fulgur
 > and Blitz (see [Building](#building)). Read [Known issues](#known-issues)
 > before using it on untrusted input.
@@ -66,7 +66,7 @@ plus a `.sha256` file. To build from source instead, see
 **Linux** (use `aarch64-unknown-linux-gnu` on ARM):
 
 ```sh
-VERSION=0.1.0
+VERSION=0.1.1
 TARGET=x86_64-unknown-linux-gnu
 NAME=bdhtml2pdf-$VERSION-$TARGET
 curl -LO https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$VERSION/$NAME.tar.gz
@@ -94,7 +94,7 @@ bdhtml2pdf` once (`curl` downloads are not quarantined).
 **Windows** (PowerShell):
 
 ```powershell
-$Version = "0.1.0"
+$Version = "0.1.1"
 $Name = "bdhtml2pdf-$Version-x86_64-pc-windows-msvc"
 Invoke-WebRequest "https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$Version/$Name.zip" -OutFile "$Name.zip"
 (Get-FileHash "$Name.zip" -Algorithm SHA256).Hash   # compare with $Name.zip.sha256
@@ -223,7 +223,7 @@ same pages with its default settings (median of 5 runs; memory is the largest
 process's RSS, plus the whole process tree for Chromium). Copied from
 [docs/benchmarks/2026-11-19.md](docs/benchmarks/2026-11-19.md).
 
-| | **bdhtml2pdf** 0.1.0 | sghtmltopdf 0.8.0 | wkhtmltopdf 0.12.6.1 | Chromium 157 headless |
+| | **bdhtml2pdf** 0.1.1 | sghtmltopdf 0.8.0 | wkhtmltopdf 0.12.6.1 | Chromium 157 headless |
 |---|---|---|---|---|
 | Modern CSS (11 checks) | **10** | 8 | 1 | 11 |
 | Modern JavaScript (19 checks) | **18** (no `Intl`) | 0 (no JS) | 0 (no ES2015+) | 18–19 |
