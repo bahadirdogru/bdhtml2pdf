@@ -185,14 +185,21 @@ fn is_arial(name: &str) -> bool {
 }
 
 /// The base font names of the embedded (subset) fonts, without the subset tag.
+/// The names of the subset fonts, read from `/BaseFont` entries only: binary
+/// font data can contain bytes that look like `/XXXXXX+` (it did on Windows).
 fn embedded_fonts(pdf: &[u8]) -> Vec<String> {
+    const KEY: &[u8] = b"/BaseFont";
     let mut names: Vec<String> = pdf
-        .split(|&b| b == b'/')
-        .filter_map(|word| {
-            let word = word
-                .split(|b| b.is_ascii_whitespace() || *b == b'>')
-                .next()?;
-            let name = std::str::from_utf8(word).ok()?;
+        .windows(KEY.len())
+        .enumerate()
+        .filter(|(_, w)| *w == KEY)
+        .filter_map(|(i, _)| {
+            let rest = &pdf[i + KEY.len()..];
+            let start = rest.iter().position(|&b| b == b'/')? + 1;
+            let len = rest[start..]
+                .iter()
+                .position(|b| b.is_ascii_whitespace() || b"/>[]<(".contains(b))?;
+            let name = std::str::from_utf8(&rest[start..start + len]).ok()?;
             Some(name.split_once('+')?.1.to_string())
         })
         .collect();
