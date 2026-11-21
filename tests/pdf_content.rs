@@ -215,10 +215,11 @@ fn missing_tahoma_falls_back_to_times_new_roman_with_turkish_letters() {
 
 #[test]
 fn font_families_resolve_as_in_chromium() {
-    // Chromium prints `sans-serif` and Helvetica in Arial (Liberation Sans on
-    // Linux, not fontconfig's Noto Sans or Nimbus Sans), and `serif`,
-    // `cursive`, `fantasy` and families that are not installed in its
-    // standard font, Times New Roman.
+    // Chromium prints `sans-serif` in Arial (Liberation Sans on Linux, not
+    // fontconfig's Noto Sans), Helvetica in Arial unless it is installed (on
+    // macOS it is; on Linux not Nimbus Sans), and `serif`, `cursive`,
+    // `fantasy` and families that are not installed in its standard font,
+    // Times New Roman.
     let cases = [
         ("sans-serif", true),
         ("'Helvetica'", true),
@@ -240,7 +241,13 @@ fn font_families_resolve_as_in_chromium() {
         let out = dir.join(format!("{i}.pdf"));
         convert(&input, &out);
         let names = embedded_fonts(&std::fs::read(&out).unwrap());
-        let expected = if *sans { is_arial } else { is_times };
+        let expected = |n: &str| {
+            if !sans {
+                is_times(n)
+            } else {
+                is_arial(n) || (family.contains("Helvetica") && n.starts_with("Helvetica"))
+            }
+        };
         assert!(
             !names.is_empty() && names.iter().all(|n| expected(n)),
             "{family}: embedded fonts {names:?}"

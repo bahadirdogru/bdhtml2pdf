@@ -18,12 +18,21 @@ const PT_TO_PX: f32 = 96.0 / 72.0;
 /// own Chromium prints `cursive` and `fantasy` in the standard font too.
 /// Text the page does not style is `serif`, and a family that is not
 /// installed falls through to it.
+///
+/// Where Helvetica, Times and Courier are not installed (Windows), Chromium
+/// prints them in Arial, Times New Roman and Courier New, as Windows'
+/// font substitutes say. On Linux fulgur already aliases them to the
+/// Liberation fonts, and on macOS they are installed.
 fn init_font_substitutes() {
     static INIT: std::sync::Once = std::sync::Once::new();
     INIT.call_once(|| {
         let times = || vec!["Times New Roman".to_string()];
         let _ = fulgur::set_font_substitutes(fulgur::FontSubstitutes {
-            families: Vec::new(),
+            families: vec![
+                ("Helvetica".into(), vec!["Arial".to_string()]),
+                ("Times".into(), times()),
+                ("Courier".into(), vec!["Courier New".to_string()]),
+            ],
             generic_families: vec![
                 ("serif".into(), times()),
                 ("sans-serif".into(), vec!["Arial".to_string()]),
