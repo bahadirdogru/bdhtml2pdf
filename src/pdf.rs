@@ -7,13 +7,32 @@ use crate::PageOptions;
 /// CSS pixels per PDF point.
 const PT_TO_PX: f32 = 96.0 / 72.0;
 
-/// The font of text the page does not style: Arial, as in wkhtmltopdf
-/// (QtWebKit's standard font) rather than the browsers' serif. Windows and
-/// macOS ship Arial; on Linux fulgur maps it to a metric-compatible family
-/// (Liberation Sans, Arimo) when one is installed, so line breaks are the
-/// same on all three. `:where` gives the rule no specificity: any
-/// `font-family` the page sets on the root or below wins.
-const DEFAULT_FONT_CSS: &str = ":where(html) { font-family: Arial, sans-serif; }";
+/// Resolves generic font families as Chromium does, so a page prints in the
+/// same fonts as in the browser. Runs once, before the first document.
+///
+/// Chromium's standard and `serif` font is Times New Roman and its
+/// `sans-serif` font Arial; on Linux fulgur maps both to a metric-compatible
+/// family (Liberation, Tinos and Arimo) when one is installed, so line breaks
+/// are the same as on Windows and macOS. fontconfig's own choice (Noto Serif
+/// and Noto Sans on many systems) has other widths. Without a font of their
+/// own Chromium prints `cursive` and `fantasy` in the standard font too.
+/// Text the page does not style is `serif`, and a family that is not
+/// installed falls through to it.
+fn init_font_substitutes() {
+    static INIT: std::sync::Once = std::sync::Once::new();
+    INIT.call_once(|| {
+        let times = || vec!["Times New Roman".to_string()];
+        let _ = fulgur::set_font_substitutes(fulgur::FontSubstitutes {
+            families: Vec::new(),
+            generic_families: vec![
+                ("serif".into(), times()),
+                ("sans-serif".into(), vec!["Arial".to_string()]),
+                ("cursive".into(), times()),
+                ("fantasy".into(), times()),
+            ],
+        });
+    });
+}
 
 fn engine(
     html: &str,
@@ -22,6 +41,7 @@ fn engine(
     title: Option<&str>,
     viewport_height_px: Option<f32>,
 ) -> fulgur::Engine {
+    init_font_substitutes();
     let mut builder = fulgur::Engine::builder()
         .page_size(fulgur::PageSize {
             width: page.width,
@@ -34,14 +54,7 @@ fn engine(
             left: page.margin_left,
         })
         .base_path(base_dir)
-        .assets({
-            // After the page's own stylesheets; order does not matter for a
-            // rule without specificity except against `*`, which styles
-            // every element directly anyway.
-            let mut assets = crate::assets::collect_images(html, base_dir);
-            assets.add_css(DEFAULT_FONT_CSS);
-            assets
-        });
+        .assets(crate::assets::collect_images(html, base_dir));
     if let Some(t) = title {
         builder = builder.title(t);
     }

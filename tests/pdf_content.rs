@@ -158,28 +158,104 @@ fn arial_uses_a_metric_compatible_font() {
     );
 }
 
+/// Turkish letters that Latin-1 lacks, and the dotted and dotless i.
+const TURKISH: &str = "Ğğ Şş İı Üü Öö Çç ĞÜŞİÖÇ ğüşıöç";
+
 #[test]
-fn unstyled_text_uses_arial() {
-    // As in wkhtmltopdf: text the page does not style is set in Arial (or
-    // its metric-compatible substitute on Linux), not the browsers' serif.
+fn unstyled_turkish_text_uses_times_new_roman() {
+    // As in Chromium: text the page does not style is set in Times New Roman
+    // (or its metric-compatible substitute on Linux). Every Turkish letter
+    // comes from that font: a missing glyph would embed a fallback font.
     let dir = tempdir("default-font");
     let input = dir.join("plain.html");
     std::fs::write(
         &input,
-        "<!DOCTYPE html><meta charset=utf-8><table border=1><tr><td>a<td>b</table>",
+        format!(
+            "<!DOCTYPE html><meta charset=utf-8>\
+             <table border=1><tr><td>{TURKISH}<td><b>{TURKISH}</b></table>"
+        ),
     )
     .unwrap();
     let out = dir.join("plain.pdf");
     convert(&input, &out);
     let names = embedded_fonts(&std::fs::read(&out).unwrap());
     assert!(
-        !names.is_empty() && names.iter().all(|n| is_arial(n)),
+        names.len() >= 2 && names.iter().all(|n| is_times(n)),
         "embedded fonts: {names:?}"
     );
 }
 
+#[test]
+fn missing_tahoma_falls_back_to_times_new_roman_with_turkish_letters() {
+    // Turkish e-invoice templates ask for `'Tahoma', "Times New Roman",
+    // serif`. Where Tahoma is missing Chromium skips it and prints in Times
+    // New Roman; so do we, Turkish letters included.
+    let dir = tempdir("tahoma");
+    let input = dir.join("tahoma.html");
+    std::fs::write(
+        &input,
+        format!(
+            "<!DOCTYPE html><meta charset=utf-8>\
+             <p style=\"font-family:'Tahoma', 'Times New Roman', serif\">{TURKISH} <b>{TURKISH}</b></p>"
+        ),
+    )
+    .unwrap();
+    let out = dir.join("tahoma.pdf");
+    convert(&input, &out);
+    let names = embedded_fonts(&std::fs::read(&out).unwrap());
+    let tahoma_installed = names.iter().any(|n| n.starts_with("Tahoma"));
+    assert!(
+        !names.is_empty()
+            && names
+                .iter()
+                .all(|n| is_times(n) || (tahoma_installed && n.starts_with("Tahoma"))),
+        "embedded fonts: {names:?}"
+    );
+}
+
+#[test]
+fn font_families_resolve_as_in_chromium() {
+    // Chromium prints `sans-serif` and Helvetica in Arial (Liberation Sans on
+    // Linux, not fontconfig's Noto Sans or Nimbus Sans), and `serif`,
+    // `cursive`, `fantasy` and families that are not installed in its
+    // standard font, Times New Roman.
+    let cases = [
+        ("sans-serif", true),
+        ("'Helvetica'", true),
+        ("serif", false),
+        ("cursive", false),
+        ("fantasy", false),
+        ("'No Such Font'", false),
+    ];
+    let dir = tempdir("families");
+    for (i, (family, sans)) in cases.iter().enumerate() {
+        let input = dir.join(format!("{i}.html"));
+        std::fs::write(
+            &input,
+            format!(
+                "<!DOCTYPE html><meta charset=utf-8><p style=\"font-family:{family}\">{TURKISH}</p>"
+            ),
+        )
+        .unwrap();
+        let out = dir.join(format!("{i}.pdf"));
+        convert(&input, &out);
+        let names = embedded_fonts(&std::fs::read(&out).unwrap());
+        let expected = if *sans { is_arial } else { is_times };
+        assert!(
+            !names.is_empty() && names.iter().all(|n| expected(n)),
+            "{family}: embedded fonts {names:?}"
+        );
+    }
+}
+
 fn is_arial(name: &str) -> bool {
     ["LiberationSans", "Arimo", "Arial"]
+        .iter()
+        .any(|family| name.starts_with(family))
+}
+
+fn is_times(name: &str) -> bool {
+    ["LiberationSerif", "Tinos", "TimesNewRoman"]
         .iter()
         .any(|family| name.starts_with(family))
 }

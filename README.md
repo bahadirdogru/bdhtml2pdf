@@ -108,8 +108,8 @@ installed (`fonts-liberation`, `fonts-crosextra-carlito`,
 `fonts-crosextra-caladea` on Debian and Ubuntu; `liberation-fonts`,
 `google-carlito-fonts`, `google-caladea-fonts` on Fedora), as with
 fontconfig's metric aliases. Windows and macOS already have the originals.
-Text the page does not style is set in Arial, as in wkhtmltopdf, so it looks
-the same on all three systems (Liberation Sans on Linux).
+Text the page does not style is set in Times New Roman, as in Chromium, so it
+looks the same on all three systems (Liberation Serif on Linux).
 
 **Coming from wkhtmltopdf?** wkhtmltopdf prints everything at 80% by default
 ("smart shrinking"). Pass `--enable-smart-shrinking` to get the same sizes and
