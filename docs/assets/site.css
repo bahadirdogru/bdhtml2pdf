@@ -186,8 +186,8 @@ h3 { margin: 0; font-size: 1.12rem; letter-spacing: -.01em; }
 .bars .us .bar { background: var(--accent); }
 .bars .us .name { color: var(--ink); font-weight: 700; }
 .bars .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
-.bars .w35 { width: 13.9%; } .bars .w13 { width: 5.2%; } .bars .w40 { width: 15.9%; } .bars .w251 { width: 100%; } .bars .w71 { width: 28.3%; }
-.bars .s29 { width: 6.7%; } .bars .s13 { width: 3.0%; } .bars .s39 { width: 9.0%; } .bars .s432 { width: 100%; } .bars .s83 { width: 19.2%; }
+.bars .w34 { width: 13.4%; } .bars .w13 { width: 5.1%; } .bars .w40 { width: 15.7%; } .bars .w254 { width: 100%; } .bars .w71 { width: 28.0%; }
+.bars .s29 { width: 6.6%; } .bars .s13 { width: 2.9%; } .bars .s39 { width: 8.8%; } .bars .s442 { width: 100%; } .bars .s83 { width: 18.8%; }
 
 .table-wrap { margin-top: 24px; overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
 table { width: 100%; border-collapse: collapse; font-size: 15px; }

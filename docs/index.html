@@ -192,7 +192,7 @@ curl --data-binary @invoice.html \
       <article class="card">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 100 18 9 9 0 000-18z"/><path d="M12 7v5l3 2"/></svg></div>
         <h3>Small and fast</h3>
-        <p>One 29 MB binary and one process. About 30–70 MB of memory and 0.07 s for a typical page on an i7-12800H; a React app with timers takes 0.15 s, a 24-page invoice 0.15 s.</p>
+        <p>One 29 MB binary and one process. About 30–70 MB of memory and 0.07 s for a typical page on an i7-12800H; a React app with timers takes 0.15 s, a 24-page invoice 0.16 s.</p>
       </article>
       <article class="card">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
@@ -366,10 +366,10 @@ curl --data-binary @invoice.html \
       <figure class="chart">
         <figcaption><b>Memory for a one-page document</b><span>Largest process, MB. Lower is better.</span></figcaption>
         <ul class="bars">
-          <li class="us"><span class="name">bdhtml2pdf</span><span class="track"><span class="bar w35"></span></span><span class="val">35 MB</span></li>
+          <li class="us"><span class="name">bdhtml2pdf</span><span class="track"><span class="bar w34"></span></span><span class="val">34 MB</span></li>
           <li><span class="name">sghtmltopdf</span><span class="track"><span class="bar w13"></span></span><span class="val">13 MB</span></li>
           <li><span class="name">wkhtmltopdf</span><span class="track"><span class="bar w40"></span></span><span class="val">40 MB</span></li>
-          <li><span class="name">Chromium</span><span class="track"><span class="bar w251"></span></span><span class="val">251 MB</span></li>
+          <li><span class="name">Chromium</span><span class="track"><span class="bar w254"></span></span><span class="val">254 MB</span></li>
           <li><span class="name">WeasyPrint</span><span class="track"><span class="bar w71"></span></span><span class="val">71 MB</span></li>
         </ul>
       </figure>
@@ -379,7 +379,7 @@ curl --data-binary @invoice.html \
           <li class="us"><span class="name">bdhtml2pdf</span><span class="track"><span class="bar s29"></span></span><span class="val">29 MB</span></li>
           <li><span class="name">sghtmltopdf</span><span class="track"><span class="bar s13"></span></span><span class="val">13 MB</span></li>
           <li><span class="name">wkhtmltopdf</span><span class="track"><span class="bar s39"></span></span><span class="val">39 MB</span></li>
-          <li><span class="name">Chromium</span><span class="track"><span class="bar s432"></span></span><span class="val">432 MB</span></li>
+          <li><span class="name">Chromium</span><span class="track"><span class="bar s442"></span></span><span class="val">442 MB</span></li>
           <li><span class="name">WeasyPrint</span><span class="track"><span class="bar s83"></span></span><span class="val">83 MB</span></li>
         </ul>
       </figure>
@@ -388,7 +388,7 @@ curl --data-binary @invoice.html \
       <table>
         <caption>Correctness and speed</caption>
         <thead>
-          <tr><th scope="col">Check</th><th scope="col">bdhtml2pdf 0.1.3</th><th scope="col">sghtmltopdf 0.8.0</th><th scope="col">wkhtmltopdf 0.12.6</th><th scope="col">Chromium 157</th><th scope="col">WeasyPrint 70.0</th></tr>
+          <tr><th scope="col">Check</th><th scope="col">bdhtml2pdf 1.0.0</th><th scope="col">sghtmltopdf 0.8.0</th><th scope="col">wkhtmltopdf 0.12.6</th><th scope="col">Chromium 158</th><th scope="col">WeasyPrint 70.0</th></tr>
         </thead>
         <tbody>
           <tr><th scope="row">Modern CSS (11)</th><td class="us">10</td><td>8</td><td>1</td><td>11</td><td>8</td></tr>
@@ -398,17 +398,17 @@ curl --data-binary @invoice.html \
           <tr><th scope="row">Turkish (15)</th><td class="us">12</td><td>8</td><td>8</td><td>14</td><td>11</td></tr>
           <tr><th scope="row">Fonts (8)</th><td class="us">8</td><td>7</td><td>6</td><td>8</td><td>7</td></tr>
           <tr><th scope="row">One-page document</th><td class="us">0.07 s</td><td>0.03 s</td><td>0.25 s</td><td>0.35 s</td><td>0.47 s</td></tr>
-          <tr><th scope="row">React app with timers</th><td class="us">0.15 s</td><td>—</td><td>—</td><td>0.36 s</td><td>—</td></tr>
-          <tr><th scope="row">24-page invoice</th><td class="us">0.15 s</td><td>0.08 s</td><td>0.37 s</td><td>0.69 s</td><td>2.11 s</td></tr>
+          <tr><th scope="row">React app with timers</th><td class="us">0.15 s</td><td>—</td><td>—</td><td>0.35 s</td><td>—</td></tr>
+          <tr><th scope="row">24-page invoice</th><td class="us">0.16 s</td><td>0.08 s</td><td>0.37 s</td><td>0.69 s</td><td>2.15 s</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="note">bdhtml2pdf is the only engine besides Chromium that runs modern JavaScript apps and modern CSS, with about a seventh of its memory. sghtmltopdf and WeasyPrint do not support JavaScript. On static pages and on long tables, bdhtml2pdf is faster than wkhtmltopdf, Chromium and WeasyPrint; sghtmltopdf is faster still, without JavaScript. Chromium's 18–19: its <code>requestAnimationFrame</code> check passes in some runs and not in others. <a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/benchmarks/2026-11-24-i7-12800h.md">Full results and method</a>.</p>
+    <p class="note">bdhtml2pdf is the only engine besides Chromium that runs modern JavaScript apps and modern CSS, with about a seventh of its memory. sghtmltopdf and WeasyPrint do not support JavaScript. On static pages and on long tables, bdhtml2pdf is faster than wkhtmltopdf, Chromium and WeasyPrint; sghtmltopdf is faster still, without JavaScript. Chromium's 18–19: its <code>requestAnimationFrame</code> check passes in some runs and not in others. <a href="https://github.com/bahadirdogru/bdhtml2pdf/blob/main/docs/benchmarks/2026-11-24-i7-12800h-1.0.0.md">Full results and method</a>.</p>
     <div class="table-wrap">
       <table>
         <caption>Features at a glance</caption>
         <thead>
-          <tr><th scope="col">Feature</th><th scope="col">bdhtml2pdf 0.1</th><th scope="col">fulgur 0.41</th><th scope="col">sghtmltopdf 0.8</th><th scope="col">wkhtmltopdf 0.12.6</th><th scope="col">Chromium 156</th><th scope="col">WeasyPrint 70</th></tr>
+          <tr><th scope="col">Feature</th><th scope="col">bdhtml2pdf 1.0</th><th scope="col">fulgur 0.41</th><th scope="col">sghtmltopdf 0.8</th><th scope="col">wkhtmltopdf 0.12.6</th><th scope="col">Chromium 156</th><th scope="col">WeasyPrint 70</th></tr>
         </thead>
         <tbody>
           <tr><th scope="row">Written in Rust</th><td class="us">✅</td><td>✅</td><td>✅</td><td>❌ C++, Qt</td><td>❌ C++</td><td>❌ Python</td></tr>

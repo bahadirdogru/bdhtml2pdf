@@ -80,12 +80,12 @@ killed by the time or memory limit.
 
 ## Results
 
-The latest results are in [benchmarks/2026-11-24-i7-12800h.md](benchmarks/2026-11-24-i7-12800h.md#security-results).
+The latest results are in [benchmarks/2026-11-24-i7-12800h-1.0.0.md](benchmarks/2026-11-24-i7-12800h-1.0.0.md#security-results).
 Summary:
 
 | Engine (defaults) | File reads and escapes (8) | SSRF (3) | Denial of service (5) |
 |---|---|---|---|
-| **bdhtml2pdf** | ✅ 8/8 blocked | ✅ 3/3 blocked | ✅ `while(true)` stopped in 0.14 s · ✅ JS memory bomb stopped in 3.7 s at 47 MB · ✅ timer flood ends in 0.06 s · ✅ billion laughs · ✅ 20 000-level nesting renders in 1.2 s |
+| **bdhtml2pdf** | ✅ 8/8 blocked | ✅ 3/3 blocked | ✅ `while(true)` stopped in 0.16 s · ✅ JS memory bomb stopped in 3.7 s at 47 MB · ✅ timer flood ends in 0.08 s · ✅ billion laughs · ✅ 20 000-level nesting renders in 1.2 s |
 | sghtmltopdf | ✅ 8/8 | ✅ 3/3 | ✅ for the JS cases, because it has no JavaScript · ⚠️ deep nesting exits with an error |
 | wkhtmltopdf | ✅ 8/8 (local file access is off by default since 0.12.6) | ❌ HTML/CSS and JavaScript (image, XHR, WebSocket) reach the internal server | ❌ billion laughs: OOM at 2 GB · ❌ deep nesting: SIGSEGV · ✅ loops are stopped after about 11 s |
 | WeasyPrint | ❌ 2/8 leak: CSS from outside the input directory, also through a symlink | ❌ HTML/CSS (image, background, font, stylesheet) and SVG images; ✅ no JavaScript requests, because it has no JavaScript | ✅ for the JS cases, because it has no JavaScript · ✅ billion laughs · ⚠️ deep nesting exits with an error after about 11 s |

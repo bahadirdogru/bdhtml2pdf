@@ -7,6 +7,7 @@ copied in from elsewhere or rounded in our favour.
 
 | Results | bdhtml2pdf | Date |
 |---|---|---|
+| [2026-11-24-i7-12800h-1.0.0.md](2026-11-24-i7-12800h-1.0.0.md) | 1.0.0 (the published Linux x86_64 binary), all five engines on the i7-12800H (Fedora 45, performance profile, Chromium 158), 10 runs | 2026-11-24 |
 | [2026-11-24-i7-12800h.md](2026-11-24-i7-12800h.md) | 0.1.3 (pre-release, opt-level 3, the published Linux x86_64 binary), all five engines on the i7-12800H (Fedora 45, performance profile), 10 runs | 2026-11-24 |
 | [2026-11-23-i7-12800h.md](2026-11-23-i7-12800h.md) | 0.1.2 (pre-release), all five engines on the i7-12800H (Fedora 45, performance profile), 10 runs | 2026-11-23 |
 | [2026-11-22.md](2026-11-22.md) | 0.1.1 (pre-release), all five engines on one machine (i7-6700, Pardus 25), 10 runs | 2026-11-22 |

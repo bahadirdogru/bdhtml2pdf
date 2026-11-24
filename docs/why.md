@@ -39,7 +39,7 @@ every language wraps. It is no longer viable:
     run, so React, Vue and Preact pages render blank.
   - No CSS custom properties, `:has()`, `:is()`, nesting, `@layer` or grid.
   - In our CSS suite it passes 1 of 11 checks
-    ([benchmarks](benchmarks/2026-11-24-i7-12800h.md)).
+    ([benchmarks](benchmarks/2026-11-24-i7-12800h-1.0.0.md)).
 - **Security.** Server-side request forgery through HTML input is a known
   issue (CVE-2022-35583). In 0.12.6 local file access was switched off by
   default, but templates that need local images or fonts are told to turn it
@@ -50,11 +50,11 @@ every language wraps. It is no longer viable:
 Chromium produces the best output of any engine and supports the whole web
 platform. For document generation at volume it costs a lot:
 
-- **Size.** The browser install measured here is 432 MB, and container images
+- **Size.** The browser install measured here is 442 MB, and container images
   are usually larger.
 - **Memory.** About 190–210 MB of cgroup memory per conversion for a one-page
   document, and about 340 MB for a 25-page invoice, spread across several
-  processes. See [benchmarks](benchmarks/2026-11-24-i7-12800h.md).
+  processes. See [benchmarks](benchmarks/2026-11-24-i7-12800h-1.0.0.md).
 - **Latency.** A warm launch took 0.33–0.69 s per document here. A cold start
   with a fresh profile took several seconds in our trials, so production
   setups keep warm browser pools. Those pools then need health
@@ -82,7 +82,7 @@ this repository.
 | Engine | What it is | Why it was not enough on its own |
 |---|---|---|
 | [sghtmltopdf](https://github.com/waka/sghtmltopdf) | Pure Rust, its own HTML/CSS engine (html5ever + cssparser + Taffy + pdf-writer), aimed at replacing wkhtmltopdf/wicked_pdf | **No JavaScript.** Its CSS coverage is hand-written, so it lacks `@layer`, `:nth-child(of S)`, gradients, multi-column and language-sensitive case mapping. Very small and fast for static templates. |
-| [WeasyPrint](https://weasyprint.org/) | Python, its own CSS engine, Pango for text. Mature paged media; PDF/A, PDF/UA and PDF/X | **No JavaScript.** Needs Python and Pango. Five to fourteen times slower than bdhtml2pdf on the static pages of [our run](benchmarks/2026-11-24-i7-12800h.md). The better choice for static HTML that has to be PDF/X today. |
+| [WeasyPrint](https://weasyprint.org/) | Python, its own CSS engine, Pango for text. Mature paged media; PDF/A, PDF/UA and PDF/X | **No JavaScript.** Needs Python and Pango. Five to fourteen times slower than bdhtml2pdf on the static pages of [our run](benchmarks/2026-11-24-i7-12800h-1.0.0.md). The better choice for static HTML that has to be PDF/X today. |
 | [fulgur](https://github.com/fulgur-rs/fulgur) | Rust: Blitz (Stylo + Taffy + Parley) → Krilla. Vector PDF, GCPM paged media, bookmarks, PDF/UA | **No JavaScript** (a stated non-goal). Pinned to an older Blitz/Stylo, so it cannot share a DOM with Blitz's JavaScript runtime. |
 | [Blitz](https://github.com/DioxusLabs/blitz) | Rust browser engine: html5ever, Firefox's Stylo, Taffy, Parley. Has `blitz-vibey-script`, a Boa-based DOM binding | No PDF output. |
 | [OxiBrowser](https://github.com/project-oxi/oxibrowser) | Headless browser for AI agents: Boa + Blitz | Its PDF is a raster screenshot (no selectable text, large files). Its separate JS DOM failed to run React, Vue and Preact in our tests, and the binary is 68.8 MB. |

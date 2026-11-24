@@ -199,10 +199,10 @@ CSS. The usual engines force a bad trade:
 | Engine | The catch |
 |---|---|
 | **wkhtmltopdf** | Archived in 2023. Its 2012-era WebKit cannot run ES2015+ (React, Vue and Preact render blank) or modern CSS. Known SSRF (CVE-2022-35583). |
-| **Headless Chromium** | Renders everything, but costs a 432 MB install, about 190–350 MB per conversion across several processes, and browser pools to babysit. With default flags it read `/etc/passwd` and made internal network requests in our security suite. |
+| **Headless Chromium** | Renders everything, but costs a 442 MB install, about 190–350 MB per conversion across several processes, and browser pools to babysit. With default flags it read `/etc/passwd` and made internal network requests in our security suite. |
 | **Native PDF libraries** | Fast, but every HTML template has to be rewritten in their API. |
 | **New native HTML engines** (e.g. sghtmltopdf) | Small and fast, but no JavaScript and only a hand-written subset of CSS. |
-| **WeasyPrint** | Strong paged media and PDF standards (PDF/A, PDF/UA, PDF/X), but no JavaScript, and it needs Python and Pango. In our run it was about 5× slower than bdhtml2pdf on one page and 13× on a 24-page invoice. |
+| **WeasyPrint** | Strong paged media and PDF standards (PDF/A, PDF/UA, PDF/X), but no JavaScript, and it needs Python and Pango. In our run it was about 5× slower than bdhtml2pdf on one page and 14× on a 24-page invoice. |
 
 We wanted **modern JS + modern CSS + vector PDF + small footprint** together.
 Nobody shipped that, but every hard part already existed as a maintained Rust
@@ -251,11 +251,11 @@ Measured on 2026-11-24 on one machine (i7-12800H, Fedora 45) with the same
 system packages and fonts for every engine. Every engine ran the same pages
 with its default settings (median of 10 runs; memory is the largest
 process's RSS, plus the whole process tree for Chromium). Copied from
-[docs/benchmarks/2026-11-24-i7-12800h.md](docs/benchmarks/2026-11-24-i7-12800h.md).
+[docs/benchmarks/2026-11-24-i7-12800h-1.0.0.md](docs/benchmarks/2026-11-24-i7-12800h-1.0.0.md).
 On a slower i7-6700 every engine takes about twice as long
 ([0.1.1 results](docs/benchmarks/2026-11-22.md)).
 
-| | **bdhtml2pdf** 0.1.3 | sghtmltopdf 0.8.0 | wkhtmltopdf 0.12.6.1 | Chromium 157 headless | WeasyPrint 70.0 |
+| | **bdhtml2pdf** 1.0.0 | sghtmltopdf 0.8.0 | wkhtmltopdf 0.12.6.1 | Chromium 158 headless | WeasyPrint 70.0 |
 |---|---|---|---|---|---|
 | Modern CSS (11 checks) | **10** | 8 | 1 | 11 | 8 |
 | Modern JavaScript (19 checks) | **18** (no `Intl`) | 0 (no JS) | 0 (no ES2015+) | 18–19 | 0 (no JS) |
@@ -267,10 +267,10 @@ On a slower i7-6700 every engine takes about twice as long
 | Vector output (raster images on text pages) | **0** | 0 | 0 | 0 | 0 |
 | File reads and SSRF blocked (11 attacks) | **11/11** | 11/11 | 9/11 | 1/11 | 7/11 |
 | Denial-of-service cases handled (5) | **5/5** | 4/5 (no JS) | 3/5 | 3/5 | 4/5 (no JS) |
-| Typical one-page document | **0.07 s · 35 MB** | 0.03 s · 13 MB | 0.25 s · 40 MB | 0.35 s · 251 MB RSS (198 MB tree) | 0.47 s · 71 MB |
-| React app with timers | **0.15 s · 52 MB** | — | — | 0.36 s · 264 MB | — |
-| 24-page invoice | **0.15 s · 69 MB** | 0.08 s · 19 MB | 0.37 s · 47 MB | 0.69 s · 339 MB (tree) | 2.11 s · 146 MB |
-| Install size | **29 MB**, one file | 13 MB | 39 MB | 432 MB | 83 MB + Python, Pango |
+| Typical one-page document | **0.07 s · 34 MB** | 0.03 s · 13 MB | 0.25 s · 40 MB | 0.35 s · 254 MB RSS (200 MB tree) | 0.47 s · 71 MB |
+| React app with timers | **0.15 s · 52 MB** | — | — | 0.35 s · 252 MB | — |
+| 24-page invoice | **0.16 s · 70 MB** | 0.08 s · 19 MB | 0.37 s · 47 MB | 0.69 s · 341 MB (tree) | 2.15 s · 146 MB |
+| Install size | **29 MB**, one file | 13 MB | 39 MB | 442 MB | 83 MB + Python, Pango |
 
 **In short:** bdhtml2pdf is the only engine besides Chromium that runs modern
 JavaScript apps and modern CSS, with about **1/7 of Chromium's memory and
