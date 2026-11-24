@@ -8,7 +8,7 @@ A modern successor to wkhtmltopdf. No Chromium, no WebKit, no Qt.
 [![CI](https://github.com/bahadirdogru/bdhtml2pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/bahadirdogru/bdhtml2pdf/actions/workflows/ci.yml)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 [![Rust 1.92+](https://img.shields.io/badge/rust-1.92%2B-orange)](#building)
-[![Status: pre-release](https://img.shields.io/badge/status-pre--release%200.1.3-yellow)](#known-issues)
+[![Release: 1.0.0](https://img.shields.io/badge/release-1.0.0-brightgreen)](https://github.com/bahadirdogru/bdhtml2pdf/releases)
 [![Security suite: 16/16](https://img.shields.io/badge/security%20suite-16%2F16-brightgreen)](docs/security.md)
 
 [Website](https://bdhtml2pdf.bahadirdogru.com) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Results](#results) · [Command line](#command-line) · [Docs](#documentation)
@@ -41,10 +41,9 @@ one process of about 29 MB, written in Rust.
 | 🖼️ **Images too** | PNG and JPEG from the PDF layout, so multi-column text and pagination look the same |
 
 > [!NOTE]
-> **Pre-release (0.1.3).** It works end to end and every claim below is
-> measured, but it still builds against patched sibling checkouts of fulgur
-> and Blitz (see [Building](#building)). Read [Known issues](#known-issues)
-> before using it on untrusted input.
+> **Release 1.0.0.** Every claim below is measured. It still builds against
+> patched sibling checkouts of fulgur and Blitz (see [Building](#building)).
+> Read [Known issues](#known-issues) before using it on untrusted input.
 
 ## Quick start
 
@@ -66,7 +65,7 @@ plus a `.sha256` file. To build from source instead, see
 **Linux** (use `linux-aarch64` on ARM):
 
 ```sh
-VERSION=0.1.3
+VERSION=1.0.0
 PLATFORM=linux-x86_64
 NAME=bdhtml2pdf-$VERSION-$PLATFORM
 curl -LO https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$VERSION/$NAME.tar.gz
@@ -94,7 +93,7 @@ bdhtml2pdf` once (`curl` downloads are not quarantined).
 **Windows** (PowerShell):
 
 ```powershell
-$Version = "0.1.3"
+$Version = "1.0.0"
 $Name = "bdhtml2pdf-$Version-windows-x86_64"
 Invoke-WebRequest "https://github.com/bahadirdogru/bdhtml2pdf/releases/download/v$Version/$Name.zip" -OutFile "$Name.zip"
 (Get-FileHash "$Name.zip" -Algorithm SHA256).Hash   # compare with $Name.zip.sha256

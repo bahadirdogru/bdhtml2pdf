@@ -20,7 +20,7 @@ import urllib.request
 from typing import Optional, Union
 
 __all__ = ["Bdhtml2pdfError", "Client", "convert", "flags"]
-__version__ = "0.1.3"
+__version__ = "1.0.0"
 
 FORMATS = ("pdf", "png", "jpg", "html")
 
