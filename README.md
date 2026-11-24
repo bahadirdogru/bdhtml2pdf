@@ -447,6 +447,7 @@ a draft GitHub release (see the
 |---|---|
 | [why.md](docs/why.md) | use cases, alternatives, and why we built this |
 | [architecture.md](docs/architecture.md) | pipeline, source layout, dependencies, upstream patches, resource policy |
+| [history.md](docs/history.md) | commit messages from before the 1.0.0 history squash |
 | [testing.md](docs/testing.md) | every test suite and how it is scored |
 | [security.md](docs/security.md) | threat model, defaults, security suite |
 | [bindings/](bindings/README.md) | Python, Node.js, Ruby and PHP packages, and the HTTP server |
