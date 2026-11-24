@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HTML parsing test</title>
+<style>
+  /* Same PASS/FAIL trick as modern-css.html, but each selector probes the tree
+     shape the HTML5 parsing algorithm must build from malformed markup. */
+  .c .p { display: none; }
+  .c .f { display: inline; }
+
+  /* 1. <tbody> is implied inside <table> */
+  table.tb > tbody > tr .p { display: inline; }
+  table.tb > tbody > tr .f { display: none; }
+  /* 2. a <div> closes an open <p> */
+  p.autoclose + div.after .p { display: inline; }
+  p.autoclose + div.after .f { display: none; }
+  /* 3. foster parenting: stray content in <table> moves before the table */
+  div.foster + table.ft .p, li.fp div.foster .p { display: inline; }
+  li.fp div.foster .f { display: none; }
+  /* 4. adoption agency: <b><i></b><span> → span inside a re-opened <i> */
+  li.aa > i > span.p { display: inline; }
+  li.aa > i > span.f, li.aa > i > span.p ~ span.f { display: none; }
+  /* 5. "<div/>" is not self-closing in HTML: the next element is its child */
+  div.sc > span.p { display: inline; }
+  div.sc > span.f { display: none; }
+  /* 6. <template> content is inert and not rendered */
+  li.tmpl .p { display: inline; }
+  li.tmpl .f { display: none; }
+</style>
+</head>
+<body>
+<ul>
+  <li class="c"><table class="tb"><tr><td><span class="p">PASS implied-tbody</span><span class="f">FAIL implied-tbody</span></td></tr></table></li>
+  <li class="c"><p class="autoclose">para<div class="after"><span class="p">PASS p-autoclose</span><span class="f">FAIL p-autoclose</span></div></li>
+  <li class="c fp"><table class="ft"><div class="foster"><span class="p">PASS foster-parenting</span><span class="f">FAIL foster-parenting</span></div><tr><td>cell</td></tr></table></li>
+  <li class="c aa"><b><i></b><span class="p">PASS adoption-agency</span><span class="f">FAIL adoption-agency</span></i></li>
+  <li class="c"><div class="sc"/><span class="p">PASS void-slash</span><span class="f">FAIL void-slash</span></div></li>
+  <li class="c tmpl"><span class="p">PASS template-inert</span><template><span>FAIL template-inert</span></template></li>
+</ul>
+<!-- 7. character references -->
+<p>H7-entities: &amp; &lt; &ouml; &#x131; &#8364; &copy;</p>
+</body>
+</html>

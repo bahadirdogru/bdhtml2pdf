@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>2026年第三季度经营报告</title>
+<!--
+  A sample for https://bdhtml2pdf.bahadirdogru.com: a Simplified Chinese
+  quarterly report in Noto Sans and Noto Serif CJK SC, with a bar chart in
+  SVG drawn by JavaScript. Regenerate with scripts/site.sh. All names and
+  figures are invented.
+-->
+<style>
+  :root {
+    --ink: oklch(25% 0.02 250);
+    --muted: oklch(52% 0.02 250);
+    --accent: oklch(52% 0.19 25);
+    --accent2: oklch(60% 0.12 220);
+    --line: oklch(90% 0.01 250);
+    --soft: oklch(97% 0.01 25);
+  }
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm;
+    @top-right { content: "星河科技集团 · 内部资料"; font: 8pt "Noto Sans CJK SC", sans-serif; color: #8a8f99; }
+    @bottom-center { content: "第 " counter(page) " 页，共 " counter(pages) " 页"; font: 8pt "Noto Sans CJK SC", sans-serif; color: #8a8f99; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 10pt/1.75 "Noto Sans CJK SC", sans-serif; color: var(--ink); }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 10px; }
+  header small { color: var(--accent); font-weight: 700; letter-spacing: .2em; }
+  h1 { margin: 2px 0 0; font: 700 22pt/1.35 "Noto Serif CJK SC", serif; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: 9pt; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 18px 0; }
+  .kpi { padding: 10px 12px; border-radius: 8px; background: var(--soft); }
+  .kpi span { display: block; color: var(--muted); font-size: 8.5pt; }
+  .kpi b { display: block; font-size: 17pt; line-height: 1.3; }
+  .kpi em { font-style: normal; font-size: 8.5pt; color: oklch(50% 0.14 150); }
+  .kpi em.down { color: var(--accent); }
+  h2 { margin: 18px 0 6px; font: 700 12.5pt/1.4 "Noto Serif CJK SC", serif; padding-left: 9px; border-left: 4px solid var(--accent); }
+  p { margin: 0 0 8px; text-align: justify; }
+  .cols { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: start; }
+  figure { margin: 0; }
+  figcaption { font-size: 8.5pt; color: var(--muted); text-align: center; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+  th { text-align: left; font-weight: 600; padding: 5px 6px; border-bottom: 1.5px solid var(--ink); }
+  td { padding: 5px 6px; border-bottom: 1px solid var(--line); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  ol { margin: 4px 0 0; padding-left: 1.6em; }
+  li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <small>季度报告</small>
+  <h1>星河科技集团 2026年第三季度经营报告</h1>
+  <p>报告期：2026年7月1日至9月30日 · 编制部门：财务管理中心 · 单位：人民币万元</p>
+</header>
+
+<section class="kpis">
+  <div class="kpi"><span>营业收入</span><b>32,480</b><em>同比 +18.4%</em></div>
+  <div class="kpi"><span>净利润</span><b>4,860</b><em>同比 +23.1%</em></div>
+  <div class="kpi"><span>毛利率</span><b>41.2%</b><em>提高 2.6 个百分点</em></div>
+  <div class="kpi"><span>经营费用率</span><b>19.8%</b><em class="down">上升 0.4 个百分点</em></div>
+</section>
+
+<h2>一、总体经营情况</h2>
+<p>第三季度，集团坚持“稳增长、提质量、控风险”的总体思路，主营业务保持良好发展势头。营业收入达到 32,480 万元，同比增长 18.4%；净利润 4,860 万元，同比增长 23.1%。云服务与电子发票业务成为增长的主要动力，海外市场收入占比首次超过两成。</p>
+
+<div class="cols">
+  <div>
+    <h2>二、分业务收入</h2>
+    <table>
+      <thead><tr><th>业务板块</th><th class="num">本季度</th><th class="num">上年同期</th><th class="num">增长率</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <figure>
+    <h2>三、季度收入趋势</h2>
+    <svg id="chart" role="img" aria-label="柱状图：近五个季度营业收入" viewBox="0 0 300 170" width="100%" font-family="Noto Sans CJK SC, sans-serif"></svg>
+    <figcaption>图1：近五个季度营业收入（万元）</figcaption>
+  </figure>
+</div>
+
+<h2>四、下季度工作重点</h2>
+<ol>
+  <li>加快电子发票平台在华南地区的推广，力争新增企业客户 1,200 家。</li>
+  <li>完成数据中心节能改造，单位算力能耗降低 15% 以上。</li>
+  <li>优化应收账款管理，将平均回款周期缩短至 45 天以内。</li>
+</ol>
+
+<script>
+  const segments = [
+    ["云服务", 12650, 9870],
+    ["电子发票", 8340, 6420],
+    ["企业软件", 6920, 6610],
+    ["硬件及集成", 4570, 4530],
+  ];
+  const rows = document.getElementById("rows");
+  let now = 0, before = 0;
+  const fmt = (v) => v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  for (const [name, a, b] of segments) {
+    now += a; before += b;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${name}</td><td class="num">${fmt(a)}</td><td class="num">${fmt(b)}</td>` +
+      `<td class="num">${((a / b - 1) * 100).toFixed(1)}%</td>`;
+    rows.append(tr);
+  }
+  const total = document.createElement("tr");
+  total.innerHTML = `<td><b>合计</b></td><td class="num"><b>${fmt(now)}</b></td><td class="num">${fmt(before)}</td>` +
+    `<td class="num"><b>${((now / before - 1) * 100).toFixed(1)}%</b></td>`;
+  rows.append(total);
+
+  const quarters = [["2025Q3", 27430], ["2025Q4", 29120], ["2026Q1", 28050], ["2026Q2", 30310], ["2026Q3", now]];
+  const svg = document.getElementById("chart");
+  const max = 35000, h = 130, bw = 36;
+  let out = `<line x1="20" y1="${h + 10}" x2="290" y2="${h + 10}" stroke="#c8ccd4"/>`;
+  quarters.forEach(([q, v], i) => {
+    const x = 34 + i * 52, bh = (v / max) * h, y = h + 10 - bh;
+    const fill = i === quarters.length - 1 ? "#d8433a" : "#4f8fb8";
+    out += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="3" fill="${fill}"/>` +
+      `<text x="${x + bw / 2}" y="${y - 4}" font-size="9" text-anchor="middle" fill="#333">${fmt(v)}</text>` +
+      `<text x="${x + bw / 2}" y="${h + 24}" font-size="9" text-anchor="middle" fill="#666">${q}</text>`;
+  });
+  svg.innerHTML = out;
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>御請求書 No. 2026-1121</title>
+<!--
+  A sample for https://bdhtml2pdf.bahadirdogru.com: a Japanese invoice in
+  Noto Sans and Noto Serif CJK JP, with line breaking by Japanese rules
+  (no line starts with 。or 」). Regenerate with scripts/site.sh. All names
+  and figures are invented.
+-->
+<style>
+  :root {
+    --ink: oklch(25% 0.01 30);
+    --muted: oklch(50% 0.01 30);
+    --accent: oklch(50% 0.17 25);
+    --line: oklch(88% 0.005 30);
+    --soft: oklch(97% 0.008 30);
+  }
+  @page {
+    size: A4;
+    margin: 18mm 18mm 20mm;
+    @bottom-right { content: counter(page) " / " counter(pages); font: 8pt "Noto Sans CJK JP", sans-serif; color: #8a8f99; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 10pt/1.7 "Noto Sans CJK JP", sans-serif; color: var(--ink); }
+  h1 { margin: 0 0 22px; text-align: center; font: 600 20pt/1.4 "Noto Serif CJK JP", serif; letter-spacing: .5em; padding-left: .5em; }
+  .top { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+  .to b { display: inline-block; font-size: 14pt; border-bottom: 1.5px solid var(--ink); padding: 0 6px 2px 0; }
+  .to p { margin: 10px 0 0; }
+  .from { text-align: right; font-size: 9pt; line-height: 1.8; position: relative; }
+  .from b { font-size: 11pt; }
+  .hanko { position: absolute; right: -4px; top: 34px; width: 54px; height: 54px; border: 2px solid var(--accent); border-radius: 50%; color: var(--accent); font: 600 10pt/1.15 "Noto Serif CJK JP", serif; display: flex; align-items: center; justify-content: center; text-align: center; opacity: .85; }
+  .meta { margin-top: 8px; font-size: 9pt; color: var(--muted); }
+  .amount { display: flex; align-items: baseline; gap: 18px; margin: 22px 0 18px; padding: 10px 16px; border: 1.5px solid var(--ink); }
+  .amount span { font-size: 10pt; }
+  .amount b { font-size: 19pt; letter-spacing: .02em; }
+  .amount small { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  th { background: var(--soft); font-weight: 600; padding: 6px 8px; border: 1px solid var(--line); }
+  td { padding: 6px 8px; border: 1px solid var(--line); }
+  .num { text-align: right; white-space: nowrap; }
+  .sum td { border: 0; padding: 3px 8px; }
+  .sum .label { text-align: right; color: var(--muted); }
+  .sum .total td { font-weight: 700; font-size: 11pt; border-top: 1.5px solid var(--ink); }
+  .bank { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
+  .bank section { padding: 10px 14px; background: var(--soft); border-radius: 6px; font-size: 9pt; }
+  .bank h2 { margin: 0 0 4px; font-size: 9pt; color: var(--accent); }
+  .bank p { margin: 0; }
+  .note { margin-top: 18px; font-size: 9pt; color: var(--muted); }
+</style>
+</head>
+<body>
+<h1>御請求書</h1>
+
+<div class="top">
+  <div class="to">
+    <b>株式会社さくら物流 御中</b>
+    <p>下記のとおりご請求申し上げます。<br>ご確認のほど、よろしくお願いいたします。</p>
+    <p class="meta">件名：顧客ポータル改修およびPDF帳票出力</p>
+  </div>
+  <div class="from">
+    請求番号 2026-1121<br>
+    請求日 2026年11月21日<br>
+    <b>北風デザイン株式会社</b><br>
+    〒150-0002 東京都渋谷区渋谷2丁目1-1<br>
+    TEL 03-1234-5678<br>
+    登録番号 T1234567890123
+    <div class="hanko">北風<br>之印</div>
+  </div>
+</div>
+
+<div class="amount">
+  <span>ご請求金額</span><b>¥1,782,000</b><small>（税込）お支払期限：2026年12月31日</small>
+</div>
+
+<table>
+  <thead><tr><th>品目</th><th>数量</th><th>単位</th><th>単価</th><th>金額</th></tr></thead>
+  <tbody>
+    <tr><td>要件定義ワークショップ（2日間）</td><td class="num">2</td><td>日</td><td class="num">120,000</td><td class="num">240,000</td></tr>
+    <tr><td>UIデザイン（デザインシステム、24画面）</td><td class="num">1</td><td>式</td><td class="num">480,000</td><td class="num">480,000</td></tr>
+    <tr><td>フロントエンド開発（React コンポーネント）</td><td class="num">64</td><td>時間</td><td class="num">9,500</td><td class="num">608,000</td></tr>
+    <tr><td>帳票PDF出力機能（請求書・納品書）</td><td class="num">1</td><td>式</td><td class="num">220,000</td><td class="num">220,000</td></tr>
+    <tr><td>サーバー構築・保守設定</td><td class="num">1</td><td>式</td><td class="num">72,000</td><td class="num">72,000</td></tr>
+  </tbody>
+  <tbody class="sum">
+    <tr><td colspan="4" class="label">小計</td><td class="num">1,620,000</td></tr>
+    <tr><td colspan="4" class="label">消費税（10%）</td><td class="num">162,000</td></tr>
+    <tr class="total"><td colspan="4" class="label">合計</td><td class="num">¥1,782,000</td></tr>
+  </tbody>
+</table>
+
+<div class="bank">
+  <section><h2>お振込先</h2><p>みずなら銀行 渋谷支店（123）<br>普通預金 1234567<br>口座名義 キタカゼデザイン（カ</p></section>
+  <section><h2>備考</h2><p>振込手数料は貴社にてご負担くださいますようお願い申し上げます。本書はHTMLから生成されたPDFです。</p></section>
+</div>
+
+<p class="note">この請求書は1つのHTMLファイルから bdhtml2pdf で作成しました。日本語の行分割規則（句読点や閉じ括弧で行を始めない）に従って改行されています。</p>
+</body>
+</html>

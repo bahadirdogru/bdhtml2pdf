@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bdhtml2pdf.bahadirdogru.com/sitemap.xml

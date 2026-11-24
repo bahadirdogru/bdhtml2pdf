@@ -1,0 +1,4 @@
+<!DOCTYPE html><meta charset="utf-8"><title>S script-escape</title>
+<!-- Leak: a script outside the input directory runs (it prints LEAKED-JS). -->
+<p>script outside the document directory</p>
+<script src="../outside/leak.js"></script>

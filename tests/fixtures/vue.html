@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head><meta charset="utf-8"><title>Vue 3</title></head>
+<body>
+<div id="app">
+  <h1>{{ title }}</h1>
+  <ul><li v-for="r in rows" :key="r.id" :class="{ odd: r.id % 2 }">{{ r.id }} – {{ r.name }}</li></ul>
+  <p id="computed">Toplam satır: {{ rows.length }}</p>
+  <p id="later">{{ later }}</p>
+</div>
+<script src="vendor/vue.global.prod.js"></script>
+<script>
+Vue.createApp({
+  data: () => ({ title: 'Vue Raporu – İçerik', rows: Array.from({ length: 30 }, (_, i) => ({ id: i + 1, name: `Satır ${i + 1}` })), later: 'bekliyor' }),
+  mounted() { setTimeout(() => { this.later = 'güncellendi'; }, 100); },
+}).mount('#app');
+</script>
+</body>
+</html>

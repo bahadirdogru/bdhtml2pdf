@@ -1,0 +1,12 @@
+<!DOCTYPE html><meta charset="utf-8"><title>S ssrf-js</title>
+<!-- Leak (SSRF): JavaScript reaches the local "internal" server at __PORT__. ES5 on purpose. -->
+<p>network requests from JavaScript</p>
+<script>
+var u = 'http://127.0.0.1:__PORT__/ssrf-';
+try { if (window.fetch) fetch(u + 'fetch')['catch'](function () {}); } catch (e) {}
+try { var x = new XMLHttpRequest(); x.open('GET', u + 'xhr'); x.send(); } catch (e) {}
+try { navigator.sendBeacon(u + 'beacon', 'x'); } catch (e) {}
+try { new Image().src = u + 'image'; } catch (e) {}
+try { new WebSocket('ws://127.0.0.1:__PORT__/ssrf-ws'); } catch (e) {}
+setTimeout(function () {}, 300);
+</script>

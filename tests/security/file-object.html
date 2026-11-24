@@ -1,0 +1,4 @@
+<!DOCTYPE html><meta charset="utf-8"><title>S file-object</title>
+<!-- Leak: /etc/passwd embedded through <object>/<embed>. -->
+<object data="file:///etc/passwd" type="text/plain" width="600" height="300"></object>
+<embed src="file:///etc/passwd" type="text/plain" width="600" height="300">

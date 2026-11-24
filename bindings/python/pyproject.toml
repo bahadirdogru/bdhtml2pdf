@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bdhtml2pdf"
+version = "0.1.3"
+description = "HTML + JavaScript to PDF with bdhtml2pdf, from Python"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+requires-python = ">=3.9"
+keywords = ["pdf", "html", "html-to-pdf", "wkhtmltopdf"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Text Processing :: Markup :: HTML",
+]
+
+[project.urls]
+Homepage = "https://bdhtml2pdf.bahadirdogru.com"
+Repository = "https://github.com/bahadirdogru/bdhtml2pdf"
+
+[tool.setuptools.packages.find]
+where = ["src"]

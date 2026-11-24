@@ -1,0 +1,14 @@
+{
+    "name": "bahadirdogru/bdhtml2pdf",
+    "description": "HTML + JavaScript to PDF with bdhtml2pdf, from PHP",
+    "type": "library",
+    "keywords": ["pdf", "html", "html-to-pdf", "wkhtmltopdf"],
+    "homepage": "https://bdhtml2pdf.bahadirdogru.com",
+    "license": "GPL-3.0-or-later",
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": { "Bdhtml2pdf\\": "src/" }
+    }
+}

@@ -1,0 +1,152 @@
+# Architecture
+
+## Pipeline
+
+```
+             input.html (+ files under its directory)
+                              │
+                              ▼
+ ┌────────────────────────────────────────────────────────────┐
+ │ blitz-html (html5ever)  →  blitz-dom  ←→  Boa (JavaScript)  │   one DOM, one Stylo
+ │   Stylo 0.24 (CSS cascade)   Taffy (layout)   Parley (text) │
+ │                                                              │
+ │   lifecycle.rs: execute <script>s → drain timers on a        │
+ │   virtual clock (--javascript-delay) → optional              │
+ │   window.status wait → wall-clock timeout                    │
+ └────────────────────────────────────────────────────────────┘
+                              │  final DOM
+                              ▼
+ ┌────────────────────────────────────────────────────────────┐
+ │ fulgur (ported to Blitz master)                             │
+ │   GCPM: @page, margin boxes, running elements, string-set,  │
+ │   counters, bookmarks · pagination · fragmentation          │
+ │   (tables, multi-column, break-*) · SVG via usvg            │
+ └────────────────────────────────────────────────────────────┘
+                              │  page tree
+                              ▼
+            Krilla → vector PDF (subset fonts, text as text)
+```
+
+Everything runs in **one process** and **one thread of control**. There is no
+browser, no IPC and no network stack.
+
+Today the final DOM is handed to fulgur as serialized HTML and parsed again
+with the same Stylo. This costs a few milliseconds and loses only rules added
+through the CSSOM (`insertRule`, constructed stylesheets). Passing the DOM over
+directly is on the [roadmap](roadmap.md).
+
+## Source layout
+
+| File | Role |
+|---|---|
+| `src/main.rs` | wkhtmltopdf- and wkhtmltoimage-compatible CLI: `input output`, `--format`, `--width`, `--height`, `--zoom`, `--quality`, `--page-size`, `--orientation`, `--page-width/height`, `--margin-*`, `--title`, `--disable-javascript`, `--javascript-delay`, `--window-status`, `--javascript-timeout`, `--javascript-loop-limit`, `--max-memory`, `--debug-javascript`, `-q`. The output extension picks PDF, PNG, JPEG or the post-JavaScript DOM (`.html`). |
+| `src/lifecycle.rs` | Render lifecycle on `ScriptDocument`: no timer thread, **virtual time**. A `setTimeout(fn, 5000)` costs no real waiting, and the result does not depend on machine speed. Also sets the loop limit, clamps nested zero-delay timers as browsers do, and runs JavaScript on a worker thread under a wall-clock watchdog. |
+| `src/depth.rs` | Flattens the DOM below 500 nesting levels (as Blink and WebKit do), and runs work on a thread with a 256 MiB stack. |
+| `src/limits.rs` | Counting global allocator: ends the process with exit status 4 above `--max-memory`. |
+| `src/fetch.rs` | Script loader sandbox: `data:` URLs and `file:` URLs **inside the input directory** only. Paths are canonicalized first, so `..` and symlinks cannot escape. No network. |
+| `src/image.rs` | PNG/JPEG output: lays the DOM out with fulgur on one page `--width` wide (no margins), measures the content, renders it again on a page exactly that tall, rasterizes the page with hayro and encodes it with `image`. The image therefore shows what the PDF shows, multi-column layout included. `vh` units follow the viewport (`--height`, or 768), not the page. Pages taller than 32 768 pixels are cut off with a warning. |
+| `src/assets.rs` | Finds the images a page refers to (`<img src>`, `url()` in `style` attributes, `<style>` and linked or `@import`ed stylesheets) and registers the files inside the input directory with fulgur, which draws only registered images. `data:` URLs need no registration. |
+| `src/pdf.rs` | Calls fulgur with page size, margins, title and a base path that confines `<link>`, `<img>` and `@import` to the input directory. |
+| `src/page.rs` | Page sizes (A3–A5, B4, B5, Letter, Legal, Ledger) and length parsing (`mm`, `cm`, `in`, `pt`, `px`). |
+| `src/prefs.rs` | Turns on Stylo features that Blitz leaves off: `:has()`, `:nth-child(… of S)`, container queries. |
+
+## Components and dependencies
+
+All of them are Rust. The only native library is the system **fontconfig**,
+used to find installed fonts.
+
+| Layer | Crate | Version | Upstream | License |
+|---|---|---|---|---|
+| HTML parsing | html5ever | 0.40 | Servo | MIT/Apache-2.0 |
+| DOM, style and layout glue | blitz-dom, blitz-html, blitz-traits | master `b4ad543` + local patches | DioxusLabs/blitz | MIT/Apache-2.0 |
+| CSS cascade | stylo | 0.24 | Servo/Firefox | MPL-2.0 |
+| Selectors, CSS parsing | selectors 0.43, cssparser 0.38 | | Servo | MPL-2.0 |
+| Box layout | taffy | 0.15 (git `a3997d5`) | DioxusLabs/taffy | MIT |
+| Text layout | parley, fontique | 0.13 | linebender | MIT/Apache-2.0 |
+| Shaping, font reading | harfrust 0.15, skrifa | | HarfBuzz port, Google Fonts | MIT/Apache-2.0 |
+| JavaScript | boa_engine | 0.22 | boa-dev | MIT/Unlicense |
+| JS ↔ DOM binding | blitz-vibey-script | master | DioxusLabs/blitz | MIT/Apache-2.0 |
+| Pagination, GCPM, PDF layout | fulgur | 0.41 (`blitz-master` port) | fulgur-rs | MIT/Apache-2.0 |
+| PDF writer | krilla, krilla-svg | 0.7 | LaurenzV | MIT/Apache-2.0 |
+| Image output | hayro (on vello_cpu 0.3), image 0.25 | 0.9 | LaurenzV, linebender, image-rs | MIT/Apache-2.0 |
+| SVG | usvg / resvg | 0.45 (PDF), 0.50 (DOM) | linebender | Apache-2.0/MIT |
+| CLI | clap | 4 | | MIT/Apache-2.0 |
+
+`Cargo.lock` pins 458 crates. Release builds use `lto = "fat"`,
+`codegen-units = 1`, `panic = "abort"` and `strip = true`.
+
+### Why one Stylo matters
+
+Stylo declares `links = "servo_style_crate"`, so **a binary can contain only one
+Stylo**. fulgur upstream is on Blitz 0.2 / Stylo 0.8, and Blitz's JavaScript
+runtime is on Blitz 0.3 / Stylo 0.24. Using both meant either two processes
+or porting fulgur. We ported fulgur. The port took 680 compile errors to
+zero, and all 2109 fulgur-blitz unit tests pass.
+
+## Changes to upstream projects
+
+These changes live in sibling checkouts (`../fulgur` on branch
+`blitz-master`, `../blitz` on `public-layout-pass`), referenced from
+`Cargo.toml` through `path` and `[patch]` entries, until they are merged
+upstream. Status as of 2026-11-19.
+
+| Project | Change | Why | Upstream |
+|---|---|---|---|
+| Blitz | `LayoutPassState` public | fulgur relays out fixed and paginated boxes with Blitz's Taffy tree. | DioxusLabs/blitz#1664, merged |
+| Blitz | `Node::svg_source` public | fulgur re-parses inline SVG with the usvg version Krilla uses. | DioxusLabs/blitz#1664, merged |
+| Blitz | `ScriptDocument::runtime_limits_mut` | Lets the embedder set Boa's loop-iteration limit, so `while (true) {}` ends instead of hanging. | DioxusLabs/blitz#1671, merged |
+| Blitz | Serializer: HTML elements are never written as `<x />` | `<i></i>` was serialized as `<i />`, which HTML parses as an *open* `<i>`. After a JavaScript round trip, the rest of the page became italic or was swallowed. A regression test is added. | DioxusLabs/blitz#1665, in review |
+| Blitz | Outside list markers keep `white-space: pre` (CSS Lists 3 UA style) | Parley 0.13 collapsed the trailing space of `"1. "`, so numbered markers touched the item text (`1.Author`). | DioxusLabs/blitz#1666, merged |
+| Blitz | An `@import` whose URL does not parse is refused | `@import url("http://[::1")` aborted the process (`unwrap()` on `None`). | DioxusLabs/blitz#1677, merged |
+| Blitz | A table's `border` attribute draws the table and cell borders | The UA stylesheet's table rules used Gecko's `:-moz-table-border-nonzero`, which Servo's selector parser drops, and the width was not mapped: `<table border="1">` drew nothing. | DioxusLabs/blitz#1681, open |
+| fulgur | Port to Blitz master / Stylo 0.24 / Parley 0.13 / Taffy git | New network-handler model, layout data only on element nodes, Stylo getter renames, Parley run indices, Taffy's new `LayoutOutput` fields. | fulgur-rs/fulgur#969, draft |
+| fulgur | Counter attributes in the null namespace, set through the DOM mutator | Blitz 0.3 matches attribute namespaces, so `counter()` / `counters()` in `::before` rendered empty. | #969 |
+| fulgur | A captioned table's percentage width moves to the caption wrapper | The `fit-content` caption wrapper made `width:100%` tables shrink to their content width under Blitz 0.3. | #969 |
+| fulgur | Variable font coordinates passed to Krilla | Parley picks bold from a variable font (`NotoSans[wght]`) by setting `wght`; Krilla drew the default instance, so bold printed as regular. | #969 |
+| fulgur | `data:` images decoded and served | `<img src="data:…">` and `url(data:…)` were silently dropped. | #969 |
+| fulgur | `viewport_height` option | Image output lays out on a page as tall as the content; `vh` must still follow the viewport. | #969 |
+| fulgur | SVG generic font families follow fontconfig | usvg's defaults are fixed names (`Arial`, `Times New Roman`); where they are not installed, `<text font-family="sans-serif">` in inline SVG (charts) was dropped. | #969 |
+| fulgur | Multi-column flow: wrappers, margins, balancing | Content in a wrapper stayed in the first column, and margins between children were dropped. | #969 |
+| fulgur | `column-rule` colors resolved with Stylo | `var()`, `currentcolor`, `oklch()` and `color-mix()` dropped the rule. | #969 |
+| fulgur | Bordered boxes break across columns, painted in slices | A box with a border, padding or background overflowed its column. | #969 |
+| fulgur | Columns continue on the next page | A multi-column block taller than the page lost everything after its first page. | #969 |
+| fulgur | Bare text between blocks in columns | Text mixed with blocks inside a multi-column container panicked. | #969 |
+| fulgur | Floats flow through columns | A float kept its whole wrapper in one column, and text did not wrap around top-level floats. | #969 |
+| fulgur | Boxes inside paragraphs | Floats in a line of text were drawn at their placeholder, and inline blocks and floats in paragraphs split across pages were not drawn. | #969 |
+| fulgur | Metric-compatible font aliases | Without Arial installed, `font-family: Arial` fell to the default font instead of Liberation Sans, so lines were wider and documents gained pages. | #969 |
+| fulgur | Borders in the collapsing border model | `border-collapse: collapse` tables drew no borders: Blitz lays them out as gutters and paints them in its own renderer. | #969 |
+| fulgur | Content scale and shrink-to-fit | Content wider than the page ran off the paper; wkhtmltopdf's smart shrinking (everything at 80%) had no counterpart. | #969 |
+| fulgur | Absolutely positioned boxes placed against their parent | Blitz master positions them relative to their containing block; an absolute box in a table cell landed off the page and shrank the document, and one in an otherwise empty `<div>` was not drawn. | #969 |
+
+## Resource policy
+
+| Resource | Default |
+|---|---|
+| `<script src>`, `fetch()` | `data:` and files under the input directory; everything else is refused. |
+| `<link>`, `@import`, `<img>`, CSS images, fonts | Files under the input directory (fulgur's `base_path`) and `data:` URLs; remote URLs are not fetched. |
+| Network | None. There is no HTTP client in the binary. |
+| JavaScript time | Virtual-time budget (`--javascript-delay`, default 200 ms), nested-timer clamping, 10 million loop iterations per call, and a wall-clock watchdog (`--javascript-timeout`, default 30 s; exit status 3). |
+| Memory | `--max-memory`, default 1024 MiB of heap; exit status 4. |
+
+The [security suite](security.md) checks these defaults, and checks what
+happens where they do not yet hold.
+
+## Release builds
+
+- Every release build compiles with `opt-level = 3`: bdhtml2pdf itself and
+  every dependency (Blitz, Boa, fulgur and the rest), in CI, in the release
+  workflow and in local benchmark builds. Runtime speed comes first; a larger
+  binary is accepted.
+- The `dev` / `test` profiles stay at Cargo's defaults (opt-level 0) so
+  that test builds stay fast; the rule is about release builds.
+- Never lower it to `"s"`, `"z"`, 1 or 2, globally or per package
+  (`[profile.release.package.*]`), to save size or build time. Keep
+  `lto = "fat"`, `codegen-units = 1` and `panic = "abort"`.
+- A new build path (a binding that compiles Rust, a new release target, a
+  build in one of our forks such as `../blitz`) uses the same settings.
+- No CPU-specific release archives (`-C target-cpu=x86-64-v3` / `native`).
+  Measured on 2026-11-23 on an i7-12800H, both were within ±5% of the
+  portable `opt-level = 3` build on every fixture, which is noise. The
+  interpreted Boa code gets nothing from AVX2. Revisit only with a new
+  measurement that shows a steady gain; even then they are extra archives,
+  never replacements for the portable ones.

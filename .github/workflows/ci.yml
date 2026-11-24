@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**", "**.md", "scripts/site.sh", "scripts/site/**"]
+  pull_request:
+    paths-ignore: ["docs/**", "**.md", "scripts/site.sh", "scripts/site/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # Fat LTO is for the release binaries; the checks do not need it.
+  CARGO_PROFILE_RELEASE_LTO: "false"
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
+
+defaults:
+  run:
+    shell: bash
+    # The patched fulgur and Blitz checkouts go next to this repository.
+    working-directory: bdhtml2pdf
+
+jobs:
+  lint:
+    name: fmt and clippy
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: bdhtml2pdf
+          persist-credentials: false
+      - run: scripts/upstream.sh fetch
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev pkg-config
+      - run: rustup toolchain install stable --profile minimal -c clippy,rustfmt && rustup default stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: bdhtml2pdf
+          key: ${{ hashFiles('bdhtml2pdf/.github/upstream.env') }}
+      - run: cargo fmt --check
+      - run: cargo clippy --release --all-targets --locked -- -D warnings
+
+  test:
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: bdhtml2pdf
+          persist-credentials: false
+      - run: scripts/upstream.sh fetch
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev pkg-config fonts-dejavu-core fonts-liberation
+      - run: rustup toolchain install stable --profile minimal && rustup default stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: bdhtml2pdf
+          key: ${{ hashFiles('bdhtml2pdf/.github/upstream.env') }}
+      # Release: Boa is slow in debug builds.
+      - run: cargo test --release --locked
+
+  bindings:
+    name: bindings (Python, Node, Ruby, PHP)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: bdhtml2pdf
+          persist-credentials: false
+      - run: scripts/upstream.sh fetch
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev pkg-config fonts-dejavu-core
+      - run: rustup toolchain install stable --profile minimal && rustup default stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: bdhtml2pdf
+          key: ${{ hashFiles('bdhtml2pdf/.github/upstream.env') }}
+      - run: cargo build --release --locked
+      - run: echo "BDHTML2PDF_BINARY=$PWD/target/release/bdhtml2pdf" >> "$GITHUB_ENV"
+      # The runner image has Python 3, Node.js, Ruby and PHP.
+      - run: python3 --version && node --version && ruby --version && php --version
+      - working-directory: bdhtml2pdf/bindings/python
+        run: PYTHONPATH=src python3 -m unittest discover -s tests -v
+      - working-directory: bdhtml2pdf/bindings/node
+        run: npm test
+      - working-directory: bdhtml2pdf/bindings/ruby
+        run: ruby -Ilib test/test_bdhtml2pdf.rb
+      - working-directory: bdhtml2pdf/bindings/php
+        run: php tests/run.php

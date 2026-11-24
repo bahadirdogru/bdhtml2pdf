@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>فاتورة ضريبية INV-2026-0731</title>
+<!--
+  A sample for https://bdhtml2pdf.bahadirdogru.com: an Arabic tax invoice,
+  right to left, with Latin codes and numbers inside Arabic text. Regenerate
+  with scripts/site.sh. All names and figures are invented.
+-->
+<style>
+  :root {
+    --ink: oklch(25% 0.02 250);
+    --muted: oklch(50% 0.02 250);
+    --accent: oklch(48% 0.12 160);
+    --line: oklch(90% 0.01 250);
+    --soft: oklch(97% 0.012 160);
+  }
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm;
+    @bottom-right { content: "شركة الواحة للحلول الرقمية · INV-2026-0731"; font: 8pt "Noto Sans Arabic", sans-serif; color: #8a8f99; }
+    @bottom-left { content: counter(page) " / " counter(pages); font: 8pt "Noto Sans Arabic", sans-serif; color: #8a8f99; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 11pt/1.7 "Noto Naskh Arabic", serif; color: var(--ink); }
+  h1, h2, th, .brand b, .grand { font-family: "Noto Sans Arabic", sans-serif; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .brand { display: flex; gap: 12px; align-items: center; }
+  .brand svg { width: 42px; height: 42px; }
+  .brand b { display: block; font-size: 15pt; line-height: 1.3; }
+  .brand span { color: var(--muted); font-size: 9pt; }
+  .doc { text-align: left; }
+  .doc h1 { margin: 0; font-size: 20pt; line-height: 1.3; color: var(--accent); }
+  .doc p { margin: 0; color: var(--muted); font-size: 9.5pt; }
+  .parties { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin: 24px 0 20px; padding: 12px 16px; background: var(--soft); border-radius: 8px; }
+  .parties h2 { margin: 0 0 2px; font-size: 8.5pt; color: var(--muted); font-weight: 600; }
+  .parties p { margin: 0; font-size: 10pt; line-height: 1.6; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: right; font-size: 8.5pt; font-weight: 600; color: var(--muted); border-bottom: 1.5px solid var(--ink); padding: 6px; }
+  td { padding: 6px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 10.5pt; }
+  td small { display: block; color: var(--muted); font-size: 8.5pt; line-height: 1.5; }
+  .num { text-align: left; font-family: "Noto Sans", sans-serif; font-size: 9.5pt; white-space: nowrap; direction: ltr; }
+  th.num { font-family: "Noto Sans Arabic", sans-serif; }
+  .summary { display: flex; justify-content: space-between; gap: 24px; margin-top: 18px; }
+  .note { flex: 1; color: var(--muted); font-size: 9.5pt; margin: 0; }
+  .note b { color: var(--ink); }
+  .totals { width: 44%; }
+  .totals div { display: flex; justify-content: space-between; padding: 3px 6px; }
+  .totals .grand { margin-top: 4px; padding: 8px 10px; border-radius: 6px; background: var(--accent); color: white; font-weight: 700; font-size: 12pt; }
+  .pay { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; }
+  .pay h2 { margin: 0; font-size: 8.5pt; color: var(--muted); font-weight: 600; }
+  .pay p { margin: 0; font-size: 10pt; }
+  .stamp { padding: 4px 14px; border: 2px solid var(--accent); color: var(--accent); border-radius: 6px; font: 700 12pt "Noto Sans Arabic", sans-serif; transform: rotate(4deg); }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#0f7a55"/><path d="M20 9c6 5 9 10 9 15a9 9 0 0 1-18 0c0-5 3-10 9-15z" fill="none" stroke="white" stroke-width="3"/></svg>
+    <div><b>شركة الواحة للحلول الرقمية</b><span>الرياض · الرقم الضريبي 300123456700003</span></div>
+  </div>
+  <div class="doc">
+    <h1>فاتورة ضريبية</h1>
+    <p>رقم الفاتورة: <span dir="ltr">INV-2026-0731</span></p>
+    <p>تاريخ الإصدار: 21 نوفمبر 2026</p>
+  </div>
+</header>
+
+<section class="parties">
+  <div><h2>العميل</h2><p><b>مؤسسة النخيل التجارية</b><br>طريق الملك فهد، حي العليا<br>جدة 21452</p></div>
+  <div><h2>المورّد</h2><p><b>شركة الواحة للحلول الرقمية</b><br>شارع التحلية 18<br>الرياض 11564</p></div>
+  <div><h2>المشروع</h2><p>تطوير بوابة العملاء<br>أمر الشراء <span dir="ltr">PO-4471</span><br>الدفع خلال 30 يوماً</p></div>
+</section>
+
+<table>
+  <thead><tr><th>الوصف</th><th class="num">الكمية</th><th class="num">سعر الوحدة</th><th class="num">المبلغ</th></tr></thead>
+  <tbody>
+    <tr><td>ورشة عمل لتحديد المتطلبات<small>يومان في مقر العميل ومقابلات مع أصحاب المصلحة</small></td><td class="num">2</td><td class="num">4,500.00</td><td class="num">9,000.00</td></tr>
+    <tr><td>تصميم واجهة المستخدم (UI)<small>نظام تصميم متكامل و 24 شاشة مع نموذج تفاعلي</small></td><td class="num">1</td><td class="num">18,000.00</td><td class="num">18,000.00</td></tr>
+    <tr><td>تطوير الواجهة الأمامية<small>مكوّنات React مع مراجعة إمكانية الوصول</small></td><td class="num">64</td><td class="num">350.00</td><td class="num">22,400.00</td></tr>
+    <tr><td>خدمة إصدار الفواتير بصيغة PDF<small>فواتير وكشوف حساب باللغتين العربية والإنجليزية</small></td><td class="num">12</td><td class="num">350.00</td><td class="num">4,200.00</td></tr>
+    <tr><td>إعداد الاستضافة<small>خط التكامل المستمر وبيئة الاختبار</small></td><td class="num">1</td><td class="num">2,400.00</td><td class="num">2,400.00</td></tr>
+  </tbody>
+</table>
+
+<div class="summary">
+  <p class="note"><b>شكراً لتعاملكم معنا.</b> أُنشئت هذه الفاتورة من ملف HTML، والنص العربي مكتوب من اليمين إلى اليسار مع أرقام ورموز لاتينية داخله. تذييل الصفحة مأخوذ من مربعات هوامش <span dir="ltr">CSS @page</span>.</p>
+  <div class="totals">
+    <div><span>المجموع قبل الضريبة</span><span class="num">56,000.00</span></div>
+    <div><span>ضريبة القيمة المضافة 15%</span><span class="num">8,400.00</span></div>
+    <div class="grand"><span>الإجمالي المستحق</span><span class="num">64,400.00 SAR</span></div>
+  </div>
+</div>
+
+<section class="pay">
+  <div>
+    <h2>معلومات الدفع</h2>
+    <p>الآيبان: <span dir="ltr">SA00 0000 0000 0000 0000 0000</span> · المرجع: <span dir="ltr">INV-2026-0731</span></p>
+  </div>
+  <div class="stamp">صادرة</div>
+</section>
+</body>
+</html>
